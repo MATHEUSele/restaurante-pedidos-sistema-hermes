@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -31,12 +31,15 @@ model Usuario {
 }
 
 model QRCode {
-  id        String   @id @default(uuid())
-  token     String   @unique @default(uuid())
-  usuarioId String
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  expiresAt DateTime
-  ativo     Boolean  @default(true)
+  id            String       @id @default(uuid())
+  token         String       @unique @default(uuid())
+  usuarioId     String
+  usuario       Usuario      @relation(fields: [usuarioId], references: [id])
+  restauranteId String?
+  restaurante   Restaurante? @relation(fields: [restauranteId], references: [id])
+  slug          String?
+  expiresAt     DateTime
+  ativo         Boolean      @default(true)
 }
 
 model Turno {
@@ -63,6 +66,8 @@ model Pedido {
   clienteNome   String
   status        String   @default("PAGO") // PAGO, EM_PREPARO, PRONTO, ENTREGUE, CANCELADO
   total         Float
+  nota          String?
+  agendadoPara  String?
   restauranteId String
   restaurante   Restaurante @relation(fields: [restauranteId], references: [id])
   criadoEm      DateTime @default(now())
