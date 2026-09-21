@@ -1,18 +1,35 @@
 "use client";
 
-import { usePedido } from "../../../context/PedidoContext";
+import { usePedidosApi } from "../../../hooks/usePedidosApi";
 import { ArrowLeft, Store, Settings, ExternalLink, Check } from "lucide-react";
 import Link from "next/link";
 import { use, useState } from "react";
 
-import { useTheme, PALETTES } from "../../../context/ThemeContext";
+const PALETTES = [
+  { id: "galo", name: "Galo (Padrão)", prim: "#7A1E2E", sec: "#F5C518" },
+  { id: "tech", name: "Tech Blue", prim: "#2563EB", sec: "#FCD34D" },
+  { id: "coffee", name: "Coffee Shop", prim: "#78350F", sec: "#D97706" },
+  { id: "neon", name: "Neon Vibes", prim: "#0F172A", sec: "#10B981" },
+  { id: "berry", name: "Berry Mix", prim: "#86198F", sec: "#F472B6" },
+  { id: "mint", name: "Mint Fresh", prim: "#065F46", sec: "#34D399" },
+  { id: "sunset", name: "Sunset Orange", prim: "#9A3412", sec: "#FB923C" },
+  { id: "ocean", name: "Ocean Depth", prim: "#1E3A8A", sec: "#38BDF8" },
+  { id: "dark", name: "Dark Knight", prim: "#111827", sec: "#F3F4F6" },
+  { id: "emerald", name: "Emerald", prim: "#047857", sec: "#A7F3D0" },
+  { id: "purple", name: "Royal Purple", prim: "#5B21B6", sec: "#C4B5FD" },
+  { id: "rose", name: "Rose Gold", prim: "#9F1239", sec: "#FECDD3" },
+  { id: "amber", name: "Amber Warmth", prim: "#B45309", sec: "#FDE68A" },
+  { id: "cyan", name: "Cyber Cyan", prim: "#155E75", sec: "#67E8F9" },
+  { id: "slate", name: "Slate Minimal", prim: "#334155", sec: "#94A3B8" },
+  { id: "indigo", name: "Indigo Night", prim: "#312E81", sec: "#818CF8" },
+];
 
 export default function RestauranteDevDetails({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
   const slug = resolvedParams.slug;
-  const { pedidos } = usePedido();
+  const { pedidos } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   
-  const { palette, setPalette } = useTheme();
+  const [palette, setPalette] = useState(PALETTES[0]);
 
   const isGalo = slug === "pastelaria-do-galo";
 
@@ -24,8 +41,8 @@ export default function RestauranteDevDetails({ params }: { params: Promise<{ sl
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
   };
   
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(date);
+  const formatTime = (dateString: string) => {
+    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(dateString));
   };
 
   return (
@@ -102,7 +119,7 @@ export default function RestauranteDevDetails({ params }: { params: Promise<{ sl
                   <div key={pedido.id} style={{ background: "#0F172A", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <h4 style={{ margin: "0 0 0.25rem 0", color: "#F8FAFC" }}>#{pedido.id}</h4>
-                      <p style={{ margin: 0, color: "#94A3B8", fontSize: "0.75rem" }}>{formatTime(pedido.createdAt)}</p>
+                      <p style={{ margin: 0, color: "#94A3B8", fontSize: "0.75rem" }}>{formatTime(pedido.criadoEm)}</p>
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ margin: "0 0 0.25rem 0", color: "#F8FAFC", fontWeight: "bold" }}>{formatPrice(pedido.total)}</p>

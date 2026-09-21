@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -16,6 +17,7 @@ model Restaurante {
   usuarios  Usuario[]
   produtos  Produto[]
   pedidos   Pedido[]
+  qrCodes   QRCode[]
 }
 
 model Usuario {
@@ -63,7 +65,7 @@ model Produto {
 
 model Pedido {
   id            String   @id @default(uuid())
-  clienteNome   String
+  clienteNome   String?
   status        String   @default("PAGO") // PAGO, EM_PREPARO, PRONTO, ENTREGUE, CANCELADO
   total         Float
   nota          String?
@@ -78,8 +80,9 @@ model ItemPedido {
   id            String   @id @default(uuid())
   pedidoId      String
   pedido        Pedido   @relation(fields: [pedidoId], references: [id])
-  produtoId     String
-  produto       Produto  @relation(fields: [produtoId], references: [id])
+  produtoId     String?
+  produto       Produto?  @relation(fields: [produtoId], references: [id])
+  nomeProduto   String?
   quantidade    Int
   precoUnitario Float
 }

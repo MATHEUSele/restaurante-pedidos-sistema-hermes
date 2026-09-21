@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: hermes_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -24,6 +24,7 @@ services:
       DATABASE_URL: "postgresql://hermes:password123@db:5432/hermes_db?schema=public"
       NEXTAUTH_SECRET: "secret-super-seguro-gerado-com-openssl"
       NEXTAUTH_URL: "http://localhost:3000"
+      AUTH_TRUST_HOST: "true"
     depends_on:
       - db
     # Executa a migration antes de iniciar a aplicacao (apenas se necessario)

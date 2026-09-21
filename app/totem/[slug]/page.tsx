@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./totem.module.css";
-import { usePedido } from "../../../context/PedidoContext";
+import { usePedido } from "../../context/PedidoContext";
 import { ShoppingBag, Search, ImageIcon } from "lucide-react";
-import { MOCK_PRODUCTS } from "../../../app/atendente/page"; // Aproveitando mock para o exemplo
+import { MOCK_PRODUCTS } from "../../atendente/page"; // Aproveitando mock para o exemplo
 
 export default function TotemMobilePage({ params }: { params: { slug: string } }) {
   const router = useRouter();

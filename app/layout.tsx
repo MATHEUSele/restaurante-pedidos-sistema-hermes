@@ -1,6 +1,5 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { PedidoProvider } from './context/PedidoContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { Providers } from './Providers'
 
@@ -18,11 +17,9 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <Providers>
-          <PedidoProvider>
-            <ThemeProvider>
-              {children}
-            </ThemeProvider>
-          </PedidoProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </Providers>
       </body>
     </html>

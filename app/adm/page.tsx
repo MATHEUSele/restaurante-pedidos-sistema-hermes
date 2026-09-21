@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePedido } from "../context/PedidoContext";
+import { usePedidosApi } from "../hooks/usePedidosApi";
 import { LayoutDashboard, Clock, History, CheckCircle, XCircle, Users, QrCode, X } from "lucide-react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
@@ -16,7 +16,7 @@ const NAV_LINKS = [
 ];
 
 export default function AdmPanel() {
-  const { pedidos, atualizarStatus } = usePedido();
+  const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [activeTab, setActiveTab] = useState<"ao_vivo" | "prontos" | "historico" | "equipe">("ao_vivo");
   const [menuOpen, setMenuOpen] = useState(false);
   const [qrCodeModal, setQrCodeModal] = useState<{ isOpen: boolean, url: string, loading: boolean }>({ isOpen: false, url: "", loading: false });
@@ -31,8 +31,8 @@ export default function AdmPanel() {
   const prontos = pedidos.filter(p => p.status === "PRONTO");
   const historico = pedidos.filter(p => p.status === "ENTREGUE" || p.status === "CANCELADO");
 
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(date);
+  const formatTime = (date: Date | string) => {
+    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
   };
   
   const formatPrice = (price: number) => {
@@ -77,6 +77,13 @@ export default function AdmPanel() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#F3F4F6", fontFamily: "Inter, sans-serif" }}>
+      <style>{`
+        @keyframes pulse {
+          0% { transform: scale(0.95); opacity: 1; }
+          50% { transform: scale(1.4); opacity: 0.6; }
+          100% { transform: scale(0.95); opacity: 1; }
+        }
+      `}</style>
       
       {/* Header */}
       <header style={{ background: "white", padding: "1.5rem 2rem", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -91,7 +98,7 @@ export default function AdmPanel() {
           </button>
           {menuOpen && (
             <nav style={{ position: "absolute", top: "100%", right: 0, marginTop: "0.5rem", background: "white", borderRadius: "0.75rem", padding: "0.5rem", minWidth: 200, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB", zIndex: 50 }}>
-              {NAV_LINKS.map(link => (
+              {NAV_LINKS.map((link: { href: string; label: string }) => (
                 <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem 0.75rem", color: "#374151", textDecoration: "none", borderRadius: "0.375rem" }}>
                   {link.label}
                 </Link>
@@ -161,7 +168,7 @@ export default function AdmPanel() {
             <p style={{ color: "#6B7280", marginBottom: "2rem" }}>Gere um QR Code para vincular o celular do atendente diretamente a este restaurante.</p>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
-              {mockEquipe.map(membro => (
+              {mockEquipe.map((membro: any) => (
                 <div key={membro.id} style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <h3 style={{ margin: 0, color: "#111827" }}>{membro.nome}</h3>
@@ -184,9 +191,13 @@ export default function AdmPanel() {
                 Nenhum pedido encontrado nesta aba.
               </div>
             ) : (
-              displayedPedidos.map(pedido => (
-                <div key={pedido.id} style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+              displayedPedidos.map((pedido: any) => (
+                <div key={pedido.id} style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", position: "relative" }}>
                   
+                  {pedido.status === "PRONTO" && (
+                    <div style={{ position: "absolute", top: -6, right: -6, width: 14, height: 14, borderRadius: "50%", background: "#10B981", animation: "pulse 1.5s infinite" }} />
+                  )}
+
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
                       <h3 style={{ margin: 0, fontSize: "1.25rem" }}>
@@ -207,7 +218,7 @@ export default function AdmPanel() {
                       )}
                     </div>
                     <p style={{ margin: 0, color: "#6B7280" }}>
-                      {pedido.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
+                      {pedido.itens?.map((i: any) => `${i.quantidade}x ${i.nomeProduto || i.produto?.nome}`).join(", ")}
                     </p>
                     {pedido.nota && (
                       <p style={{ margin: "0.5rem 0 0 0", color: "#D97706", fontSize: "0.875rem", fontWeight: 500 }}>

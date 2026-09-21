@@ -1,10 +1,10 @@
 "use client";
 
-import { usePedido } from "../context/PedidoContext";
+import { usePedidosApi } from "../hooks/usePedidosApi";
 import { Clock, ChefHat, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./cozinha.module.css";
 
 const NAV_LINKS = [
@@ -16,14 +16,31 @@ const NAV_LINKS = [
 ];
 
 export default function CozinhaInterface() {
-  const { pedidos, atualizarStatus } = usePedido();
+  const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 10000); // atualiza a cada 10s
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTempoEspera = (criadoEm: string | Date) => {
+    const diff = now.getTime() - new Date(criadoEm).getTime();
+    return Math.floor(diff / 60000); // minutos
+  };
+
+  const getCorTimer = (minutos: number) => {
+    if (minutos >= 15) return "#EF4444"; // Vermelho
+    if (minutos >= 10) return "#F5C518"; // Amarelo
+    return "#10B981"; // Verde
+  };
 
   // A cozinha vê o que está PAGO, EM_PREPARO ou PRONTO
   const pedidosAtivos = pedidos.filter(p => p.status === "PAGO" || p.status === "EM_PREPARO" || p.status === "PRONTO");
 
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(date);
+  const formatTime = (dateString: string) => {
+    return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(dateString));
   };
 
   return (
@@ -62,7 +79,11 @@ export default function CozinhaInterface() {
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
-          {pedidosAtivos.map((pedido) => (
+          {pedidosAtivos.map((pedido) => {
+            const minutosEspera = getTempoEspera(pedido.criadoEm);
+            const timerColor = getCorTimer(minutosEspera);
+
+            return (
             <div key={pedido.id} className={`${styles.orderCard} ${styles.fadeInUp}`} style={{ 
               background: pedido.status === "EM_PREPARO" ? "#1F2937" : pedido.status === "PRONTO" ? "#064E3B" : "#374151", 
               borderRadius: "1rem", 
@@ -75,10 +96,10 @@ export default function CozinhaInterface() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "1.5rem", color: "#F9FAFB" }}>
-                    {pedido.clienteNome ? pedido.clienteNome.toUpperCase() : `#${pedido.id}`}
+                    {pedido.clienteNome ? pedido.clienteNome.toUpperCase() : `#${pedido.id.slice(0,4)}`}
                   </h3>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", color: "#9CA3AF", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-                    <Clock size={14} /> Feito às {formatTime(pedido.createdAt)}
+                    <Clock size={14} /> Feito às {formatTime(pedido.criadoEm)}
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem" }}>
@@ -89,6 +110,13 @@ export default function CozinhaInterface() {
                   }}>
                     {pedido.status === "EM_PREPARO" ? "PREPARANDO" : pedido.status === "PRONTO" ? "PRONTO" : "NOVO"}
                   </span>
+                  
+                  {pedido.status !== "PRONTO" && (
+                    <div style={{ backgroundColor: timerColor, color: "white", padding: "0.25rem 0.5rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                      <Clock size={12} /> {minutosEspera} min
+                    </div>
+                  )}
+
                   {pedido.agendadoPara && (
                     <span className={styles.pulseAlert} style={{ background: "#EA580C", color: "white", padding: "0.25rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", display: "inline-block" }}>
                       Agendado: {pedido.agendadoPara}
@@ -104,9 +132,9 @@ export default function CozinhaInterface() {
               )}
 
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0", flex: 1 }}>
-                {pedido.items.map((item, idx) => (
+                {pedido.itens?.map((item: any, idx: number) => (
                   <li key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                    <span style={{ fontWeight: 600 }}>{item.quantity}x {item.name}</span>
+                    <span style={{ fontWeight: 600 }}>{item.quantidade}x {item.nomeProduto || item.produto?.nome}</span>
                   </li>
                 ))}
               </ul>
@@ -141,7 +169,8 @@ export default function CozinhaInterface() {
                 </button>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

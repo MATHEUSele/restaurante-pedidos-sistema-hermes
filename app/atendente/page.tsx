@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import styles from "./atendente.module.css";
-import { usePedido } from "../context/PedidoContext";
+import { usePedidosApi } from "../hooks/usePedidosApi";
 import { Store, ShoppingCart, Plus, Minus, Trash2, CheckCircle2, Image as ImageIcon, Menu, X, Clock, User, FileText } from "lucide-react";
 
 const NAV_LINKS = [
@@ -17,7 +17,7 @@ const NAV_LINKS = [
 // Mock Data baseado no cardápio "Pastelaria do Galo"
 const MOCK_CATEGORIES = ["Salgados", "Especiais", "Doces", "Bebidas"];
 
-const MOCK_PRODUCTS = [
+export const MOCK_PRODUCTS = [
   { id: "1", name: "Carne", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80" },
   { id: "2", name: "Queijo", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80" },
   { id: "3", name: "Frango", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80" },
@@ -53,13 +53,15 @@ type CartItem = {
 };
 
 export default function AtendenteInterface() {
-  const { pedidos, adicionarPedido, atualizarStatus } = usePedido();
+  const { pedidos, criarPedido, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [activeTab, setActiveTab] = useState<"cardapio" | "prontos">("cardapio");
   const [activeCategory, setActiveCategory] = useState("Salgados");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  
+  // Modals
+  const [checkoutModal, setCheckoutModal] = useState(false);
   const [orderSuccessModal, setOrderSuccessModal] = useState(false);
   
   // Campos Opcionais do Carrinho
@@ -108,29 +110,34 @@ export default function AtendenteInterface() {
     setItemToRemove(null);
   };
 
-  const handleConfirmarPedido = () => {
+  const handleConfirmarPedido = async () => {
     if (cart.length === 0) return;
     
-    // Mapear para o formato do context
-    const items = cart.map(i => ({
-      id: i.product.id,
-      name: i.product.name,
-      price: i.product.price,
-      quantity: i.quantity
+    // Mapear para o formato da API
+    const itens = cart.map(i => ({
+      nomeProduto: i.product.name,
+      precoUnitario: i.product.price,
+      quantidade: i.quantity
     }));
 
-    adicionarPedido(items, total, {
+    const success = await criarPedido({
+      restauranteId: "rest-pastelaria-do-galo",
       clienteNome: clienteNome.trim() || undefined,
       nota: nota.trim() || undefined,
       agendadoPara: agendadoPara || undefined,
+      itens
     });
-    setCart([]);
-    setClienteNome("");
-    setNota("");
-    setAgendadoPara("");
     
-    // Feedback visual e Modal Stepper
-    setOrderSuccessModal(true);
+    if (success) {
+      setCart([]);
+      setClienteNome("");
+      setNota("");
+      setAgendadoPara("");
+      setCheckoutModal(false);
+      setOrderSuccessModal(true);
+    } else {
+      alert("Erro ao criar pedido. Tente novamente.");
+    }
   };
 
   const closeSuccessModal = () => {
@@ -159,16 +166,7 @@ export default function AtendenteInterface() {
         )}
       </div>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div style={{
-          position: "fixed", top: "1rem", left: "50%", transform: "translateX(-50%)",
-          background: "#10B981", color: "white", padding: "1rem 2rem", borderRadius: "999px",
-          fontWeight: "bold", zIndex: 1000, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)"
-        }}>
-          {toastMessage}
-        </div>
-      )}
+      {/* Toast Not removido em prol de feedback nativo */}
       
       {/* Main Content (Left) */}
       <div className={styles.main}>
@@ -256,7 +254,7 @@ export default function AtendenteInterface() {
                     </div>
                     
                     <p style={{ margin: "0 0 1.5rem 0", color: "#6B7280" }}>
-                      {pedido.items.length} itens • {formatPrice(pedido.total)}
+                      {pedido.itens?.length || 0} itens • {formatPrice(pedido.total)}
                     </p>
 
                     <button 
@@ -311,40 +309,6 @@ export default function AtendenteInterface() {
         </div>
 
         <div className={styles.cartFooter}>
-          {cart.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem", padding: "1rem", background: "#F3F4F6", borderRadius: "0.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <User size={16} color="#6B7280" />
-                <input 
-                  type="text" 
-                  placeholder="Nome do Cliente (Opcional)" 
-                  value={clienteNome}
-                  onChange={e => setClienteNome(e.target.value)}
-                  style={{ flex: 1, padding: "0.5rem", border: "1px solid #D1D5DB", borderRadius: "0.25rem" }}
-                />
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <FileText size={16} color="#6B7280" />
-                <textarea 
-                  placeholder="Observação da Cozinha (Opcional)" 
-                  value={nota}
-                  onChange={e => setNota(e.target.value)}
-                  style={{ flex: 1, padding: "0.5rem", border: "1px solid #D1D5DB", borderRadius: "0.25rem", resize: "none", height: "40px" }}
-                />
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Clock size={16} color="#6B7280" />
-                <input 
-                  type="time" 
-                  value={agendadoPara}
-                  onChange={e => setAgendadoPara(e.target.value)}
-                  style={{ padding: "0.5rem", border: "1px solid #D1D5DB", borderRadius: "0.25rem" }}
-                />
-                <span style={{ fontSize: "0.75rem", color: "#6B7280" }}>Agendar (Opcional)</span>
-              </div>
-            </div>
-          )}
-
           <div className={styles.totalRow}>
             <span className={styles.totalLabel}>Total</span>
             <span className={styles.totalValue}>{formatPrice(total)}</span>
@@ -352,7 +316,7 @@ export default function AtendenteInterface() {
           <button 
             className={`${styles.confirmBtn} ${cart.length > 0 ? styles.animatePulse : ''}`} 
             disabled={cart.length === 0}
-            onClick={handleConfirmarPedido}
+            onClick={() => setCheckoutModal(true)}
           >
             <CheckCircle2 size={24} /> Confirmar Pedido
           </button>
@@ -378,7 +342,54 @@ export default function AtendenteInterface() {
           </div>
         </div>
       )}
+      {/* Checkout Options Modal */}
+      {checkoutModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent} style={{ maxWidth: "400px" }}>
+            <h3 className={styles.modalTitle} style={{ marginBottom: "1.5rem" }}>Detalhes Adicionais</h3>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <label style={{ fontSize: "0.875rem", color: "#4B5563", fontWeight: 600 }}>Nome do Cliente (Para chamar)</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: João Silva" 
+                  value={clienteNome}
+                  onChange={e => setClienteNome(e.target.value)}
+                  style={{ padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "1rem" }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <label style={{ fontSize: "0.875rem", color: "#4B5563", fontWeight: 600 }}>Observação (Para a Cozinha)</label>
+                <textarea 
+                  placeholder="Ex: Sem cebola, bem passado" 
+                  value={nota}
+                  onChange={e => setNota(e.target.value)}
+                  style={{ padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "1rem", minHeight: "80px", resize: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <label style={{ fontSize: "0.875rem", color: "#4B5563", fontWeight: 600 }}>Agendar Horário (Opcional)</label>
+                <input 
+                  type="time" 
+                  value={agendadoPara}
+                  onChange={e => setAgendadoPara(e.target.value)}
+                  style={{ padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "1rem" }}
+                />
+              </div>
+            </div>
 
+            <div className={styles.modalActions}>
+              <button className={`${styles.modalBtn} ${styles.cancel}`} onClick={() => setCheckoutModal(false)}>
+                Voltar
+              </button>
+              <button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleConfirmarPedido} style={{ background: "#10B981", color: "white" }}>
+                Enviar Pedido ({formatPrice(total)})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Order Success Modal with Stepper */}
       {orderSuccessModal && (
         <div className={styles.modalOverlay}>
