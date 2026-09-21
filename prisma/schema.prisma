@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurante {
+  id        String   @id @default(uuid())
+  nome      String
+  logo      String?
+  cores     String?  
+  horarios  String?  
+  usuarios  Usuario[]
+  produtos  Produto[]
+  pedidos   Pedido[]
+}
+
+model Usuario {
+  id            String   @id @default(uuid())
+  nome          String
+  email         String?  @unique // Opcional para quem loga via QRCode
+  senha         String?  // Opcional para quem loga via QRCode
+  perfil        String   // DEV, ADM, COZINHA, ATENDENTE
+  restauranteId String?
+  restaurante   Restaurante? @relation(fields: [restauranteId], references: [id])
+  qrCodes       QRCode[]
+  turnos        Turno[]
+}
+
+model QRCode {
+  id        String   @id @default(uuid())
+  token     String   @unique @default(uuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  expiresAt DateTime
+  ativo     Boolean  @default(true)
+}
+
+model Turno {
+  id        String   @id @default(uuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  entrada   DateTime @default(now())
+  saida     DateTime?
+}
+
+model Produto {
+  id            String   @id @default(uuid())
+  nome          String
+  imagem        String?
+  preco         Float
+  categoria     String
+  restauranteId String
+  restaurante   Restaurante @relation(fields: [restauranteId], references: [id])
+  itensPedido   ItemPedido[]
+}
+
+model Pedido {
+  id            String   @id @default(uuid())
+  clienteNome   String
+  status        String   @default("PAGO") // PAGO, EM_PREPARO, PRONTO, ENTREGUE, CANCELADO
+  total         Float
+  restauranteId String
+  restaurante   Restaurante @relation(fields: [restauranteId], references: [id])
+  criadoEm      DateTime @default(now())
+  itens         ItemPedido[]
+}
+
+model ItemPedido {
+  id            String   @id @default(uuid())
+  pedidoId      String
+  pedido        Pedido   @relation(fields: [pedidoId], references: [id])
+  produtoId     String
+  produto       Produto  @relation(fields: [produtoId], references: [id])
+  quantidade    Int
+  precoUnitario Float
+}
+
+model Log {
+  id            String   @id @default(uuid())
+  acao          String
+  usuarioId     String?
+  restauranteId String?
+  criadoEm      DateTime @default(now())
+}
