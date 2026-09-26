@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: hermes
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: hermes_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://hermes:password123@localhost:5432/hermes_db?schema=public
+      NEXTAUTH_SECRET: secret-super-seguro-gerado-com-openssl
+      NEXTAUTH_URL: http://localhost:3000
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check Formatting & Linting (ESLint)
+      run: npm run lint
+
+    - name: Check Structure (TypeScript compilation)
+      run: npx tsc --noEmit
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Create Env File
+      run: cp .env.example .env
+
+    - name: Setup Database (Prisma)
+      run: |
+        npx prisma generate
+        npx prisma migrate dev --name init
+        npm run seed
+
+    - name: Build Next.js app
+      run: npm run build
+
+    - name: Run E2E Tests (Playwright)
+      run: npx playwright test
+      env:
+        PORT: 3000
+
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 10
