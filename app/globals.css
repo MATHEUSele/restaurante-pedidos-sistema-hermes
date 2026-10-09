@@ -13,6 +13,14 @@
   --danger: #EF4444;
 }
 
+html.dark {
+  --background: #111827;
+  --surface: #1F2937;
+  --text: #F9FAFB;
+  --text-muted: #9CA3AF;
+  --border: #374151;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -29,4 +37,13 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.97);
 }
