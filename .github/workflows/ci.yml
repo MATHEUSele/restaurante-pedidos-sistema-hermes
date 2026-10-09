@@ -50,6 +50,9 @@ jobs:
     - name: Check Structure (TypeScript compilation)
       run: npx tsc --noEmit
 
+    - name: Run Unit Tests
+      run: npm run test
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 

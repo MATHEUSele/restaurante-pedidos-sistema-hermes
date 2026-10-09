@@ -28,9 +28,24 @@ interface Options {
 }
 
 export function usePedidosApi(options: Options = {}) {
-  const [pedidos, setPedidos] = useState<PedidoApi[]>([]);
-  const [loading, setLoading] = useState(true);
   const { statusFilter, restauranteId, pollingInterval = 5000 } = options;
+  const cacheKey = `pedidosCache_${restauranteId || "all"}_${statusFilter || "all"}`;
+
+  const [pedidos, setPedidos] = useState<PedidoApi[]>(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          return [];
+        }
+      }
+    }
+    return [];
+  });
+  
+  const [loading, setLoading] = useState(pedidos.length === 0);
 
   const fetchPedidos = useCallback(async () => {
     try {
@@ -42,13 +57,16 @@ export function usePedidosApi(options: Options = {}) {
       if (res.ok) {
         const data = await res.json();
         setPedidos(data);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+        }
       }
     } catch (e) {
       console.error("Erro ao buscar pedidos", e);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, restauranteId]);
+  }, [statusFilter, restauranteId, cacheKey]);
 
   useEffect(() => {
     fetchPedidos();

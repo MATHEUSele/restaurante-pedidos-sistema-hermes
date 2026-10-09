@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { href: "/atendente", label: "🧾 Atendente" },
 ];
 
-export default function CozinhaInterface() {
+function CozinhaInterface() {
   const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(new Date());
@@ -174,5 +174,14 @@ export default function CozinhaInterface() {
         </div>
       )}
     </div>
+  );
+}
+
+import { RequireAuth } from "../components/RequireAuth";
+export default function Page() {
+  return (
+    <RequireAuth allowedRoles={["ADM", "COZINHA", "DEV"]}>
+      <CozinhaInterface />
+    </RequireAuth>
   );
 }

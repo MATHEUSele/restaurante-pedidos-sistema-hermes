@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { href: "/atendente", label: "🧾 Atendente" },
 ];
 
-export default function AdmPanel() {
+function AdmPanel() {
   const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [activeTab, setActiveTab] = useState<"ao_vivo" | "prontos" | "historico" | "equipe">("ao_vivo");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -290,5 +290,14 @@ export default function AdmPanel() {
         </div>
       )}
     </div>
+  );
+}
+
+import { RequireAuth } from "../components/RequireAuth";
+export default function Page() {
+  return (
+    <RequireAuth allowedRoles={["ADM", "DEV"]}>
+      <AdmPanel />
+    </RequireAuth>
   );
 }

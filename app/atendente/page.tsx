@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./atendente.module.css";
 import { usePedidosApi } from "../hooks/usePedidosApi";
@@ -52,10 +52,35 @@ type CartItem = {
   quantity: number;
 };
 
-export default function AtendenteInterface() {
+function AtendenteInterface() {
   const { pedidos, criarPedido, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
-  const [activeTab, setActiveTab] = useState<"cardapio" | "prontos">("cardapio");
-  const [activeCategory, setActiveCategory] = useState("Salgados");
+  
+  const [activeTab, setActiveTab] = useState<"cardapio" | "prontos">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("atendente_activeTab") as any) || "cardapio";
+    }
+    return "cardapio";
+  });
+
+  const [activeCategory, setActiveCategory] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("atendente_activeCategory") || "Salgados";
+    }
+    return "Salgados";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("atendente_activeTab", activeTab);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("atendente_activeCategory", activeCategory);
+    }
+  }, [activeCategory]);
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -429,5 +454,14 @@ export default function AtendenteInterface() {
         </div>
       )}
     </div>
+  );
+}
+
+import { RequireAuth } from "../components/RequireAuth";
+export default function Page() {
+  return (
+    <RequireAuth allowedRoles={["ADM", "ATENDENTE", "DEV"]}>
+      <AtendenteInterface />
+    </RequireAuth>
   );
 }

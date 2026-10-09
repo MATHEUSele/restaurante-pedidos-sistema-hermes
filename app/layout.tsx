@@ -2,6 +2,10 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { ThemeProvider } from './context/ThemeContext'
 import { Providers } from './Providers'
+import { Inter } from 'next/font/google'
+import { ToastProvider } from './context/ToastContext'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Hermes - Pedidos',
@@ -14,11 +18,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={inter.className}>
       <body>
         <Providers>
           <ThemeProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </Providers>
       </body>
