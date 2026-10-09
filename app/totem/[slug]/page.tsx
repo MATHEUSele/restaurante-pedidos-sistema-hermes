@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import styles from "./totem.module.css";
 import { usePedido } from "../../context/PedidoContext";
 import { ShoppingBag, Search, ImageIcon } from "lucide-react";
@@ -89,7 +90,7 @@ export default function TotemMobilePage({ params }: { params: { slug: string } }
             <div key={product.id} className={styles.productCard} onClick={() => addToCart(product)}>
               <div className={styles.productImage}>
                 {product.image ? (
-                  <img src={product.image} alt={product.name} />
+                  <Image src={product.image} alt={product.name} fill style={{ objectFit: 'cover' }} />
                 ) : (
                   <ImageIcon size={32} opacity={0.3} />
                 )}

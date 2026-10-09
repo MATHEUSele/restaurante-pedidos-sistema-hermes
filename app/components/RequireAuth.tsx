@@ -28,7 +28,7 @@ export function RequireAuth({
     if (allowedRoles.length > 0 && session.user?.perfil) {
       if (!allowedRoles.includes(session.user.perfil)) {
         addToast("Você não tem permissão para acessar esta página.", "error");
-        router.replace("/dev"); // fallback if not allowed
+        router.replace("/"); // fallback if not allowed
       }
     }
   }, [session, status, router, allowedRoles, addToast]);

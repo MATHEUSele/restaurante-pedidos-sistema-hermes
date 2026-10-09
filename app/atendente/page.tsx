@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./atendente.module.css";
 import { usePedidosApi } from "../hooks/usePedidosApi";
 import { Store, ShoppingCart, Plus, Minus, Trash2, CheckCircle2, Image as ImageIcon, Menu, X, Clock, User, FileText } from "lucide-react";
@@ -242,7 +243,7 @@ function AtendenteInterface() {
                 <div key={product.id} className={`${styles.productCard} ${styles.animateFadeIn}`}>
                   <div className={styles.productImage}>
                     {product.image ? (
-                      <img src={product.image} alt={product.name} />
+                      <Image src={product.image} alt={product.name} fill style={{ objectFit: 'cover' }} />
                     ) : (
                       <ImageIcon size={48} opacity={0.3} />
                     )}

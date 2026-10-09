@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Sistema de pedidos para restaurantes',
 }
 
+import ThemeToggle from './components/ThemeToggle'
+
 export default function RootLayout({
   children,
 }: {
@@ -25,6 +27,9 @@ export default function RootLayout({
           <Providers>
             <PaletteProvider>
               <ToastProvider>
+                <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 9999 }}>
+                  <ThemeToggle />
+                </div>
                 {children}
               </ToastProvider>
             </PaletteProvider>

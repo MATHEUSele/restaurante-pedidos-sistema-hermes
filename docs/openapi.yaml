@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: API Hermes Restaurante
+  version: 1.0.0
+  description: API REST para gestão de pedidos, QR Codes e Autenticação no sistema Hermes.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor Local
+paths:
+  /health:
+    get:
+      summary: Health Check da API e Banco de Dados
+      responses:
+        '200':
+          description: API Operante
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  database:
+                    type: string
+                    example: connected
+        '503':
+          description: Erro no Banco de Dados
+  /pedidos:
+    get:
+      summary: Lista todos os pedidos
+      parameters:
+        - in: query
+          name: restauranteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+    post:
+      summary: Cria um novo pedido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clienteNome:
+                  type: string
+                itens:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Pedido Criado
+  /pedidos/{id}/status:
+    patch:
+      summary: Atualiza status do pedido
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Status atualizado
