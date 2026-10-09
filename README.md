@@ -1,80 +1,85 @@
-# Sistema Hermes 📦🍽️
+# Hermes – Sistema de Pedidos 🍽️
 
-O Hermes é um sistema completo e moderno de gestão de pedidos e controle de fila (KDS - Kitchen Display System) projetado para restaurantes de fast-food e lanchonetes.
+![Hero Image](file:///C:/Users/matheuss/.gemini/antigravity-ide/brain/b9665d40-b7a1-45c1-811e-4a1936df87ed/hermes_dashboard_hero_1791559295461.jpg)
 
-## 🚀 Funcionalidades Principais
+> **Um sistema completo, elegante e pronto para produção**
 
-- **Painel Administrativo (ADM)**: Visão geral das vendas diárias, histórico, ticket médio e gerenciamento de permissões da equipe (incluindo geração de QR Codes de acesso rápido para os totens).
-- **Painel da Cozinha (KDS)**: Interface auto-atualizável (polling ou WebSockets/SSE no futuro) focada nos pedidos pendentes, permitindo alterar status para "Pronto".
-- **Painel do Atendente (Totem/PDV)**: Tela de registro rápido de pedidos em modo quiosque/totem para inserir o nome do cliente, os produtos e confirmar a compra.
-- **Autenticação RBAC e Segurança**: Rotas estritamente protegidas por nível de usuário usando Next-Auth com proteção CSRF e headers customizados.
-- **Cache e Offline-first (UX Premium)**: Uso de cache persistente via `localStorage` para navegação fluída entre transições de estado, impedindo "telas piscando" (Flicker UI).
+O **Hermes** possibilita a gestão de pedidos e filas (KDS) para restaurantes de fast‑food e lanchonetes, trazendo uma **UX premium** com modo escuro, micro‑animações suaves e um design responsivo que se adapta a desktops, tablets e smartphones.
 
-## 🛠️ Tecnologias Utilizadas
+---
 
-- **Frontend**: Next.js 14+ (App Router), React 18, CSS Modules + Variáveis Nativas.
-- **Backend/API**: Next.js API Routes.
-- **Banco de Dados**: PostgreSQL com Prisma ORM.
-- **Segurança**: Next-Auth, Helmet Headers, e Bcrypt.
-- **Testes Automáticos**: 
-  - Unitários: Vitest + React Testing Library.
-  - E2E e API: Playwright.
+## ✨ Principais Funcionalidades
+
+- **Painel Administrativo (ADM)** – visão geral de vendas, tickets médios, controle de permissões e geração de QR Codes para totens.
+- **Painel da Cozinha (KDS)** – lista de pedidos em tempo real com status colorido e animações de transição.
+- **Totem/PDV** – interface de auto‑atendimento com catálogo de produtos, filtro por categoria e checkout rápido.
+- **Autenticação RBAC** – segurança via `next‑auth` com proteção contra CSRF e cabeçalhos hardening.
+- **Tema Dinâmico** – troca instantânea entre modo **claro** e **escuro** usando o componente flutuante abaixo.
+
+![Theme Toggle Demo](file:///C:/Users/matheuss/.gemini/antigravity-ide/brain/b9665d40-b7a1-45c1-811e-4a1936df87ed/theme_toggle_demo_1791559314207.jpg)
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|--------|------------|
+| Frontend | **Next.js 14** (App Router) • React 18 • TypeScript • `next‑themes` • `framer‑motion` |
+| UI | CSS custom properties (variáveis HSL), micro‑animações, layout Grid/Flex, fonte **Inter** |
+| Backend | API Routes do Next.js • Prisma ORM • PostgreSQL |
+| Testes | Vitest (unit) • Playwright (E2E) |
+| CI/CD | GitHub Actions – matriz Node 18/20 × Ubuntu/Windows, cache de dependências, deploy preview Vercel |
+| Monitoramento | Sentry (client & server) • Endpoint `/api/health` |
 
 ## 🚀 Como Executar Localmente
 
-### Pré-requisitos
-- Node.js 18 ou superior.
-- Banco PostgreSQL configurado.
+```bash
+# Clone o repositório
+git clone https://github.com/MATHEUSele/restaurante-pedidos-sistema-hermes.git
+cd restaurante-pedidos-sistema-hermes
 
-### Passos:
+# Instale as dependências
+npm install
 
-1. Clone o repositório:
-   ```bash
-   git clone <url-do-repo>
-   ```
+# Configure variáveis de ambiente
+cp .env.example .env
+# edite .env (DATABASE_URL, NEXTAUTH_SECRET, etc.)
 
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+# Prepare o banco de dados
+npx prisma generate
+npx prisma db push
+npm run seed   # opcional – insere dados de exemplo
 
-3. Configure o arquivo de variáveis de ambiente:
-   ```bash
-   cp .env.example .env
-   # Preencha a DATABASE_URL e a NEXTAUTH_SECRET (ex: gerada via openssl rand -base64 32)
-   ```
+# Inicie a aplicação
+npm run dev
+```
 
-4. Prepare o Banco de Dados (Schema e Seeds iniciais):
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   npm run seed
-   ```
+Acesse `http://localhost:3000` e explore as rotas:
+- `/login` – autenticação
+- `/adm` – painel administrativo
+- `/cozinha` – KDS
+- `/atendente` – totem
 
-5. Rode a aplicação em modo de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+## 📚 Documentação
 
-O sistema estará disponível em `http://localhost:3000`. Acesse `/login` com as credenciais do admin criadas no seed.
+- **Guia de Contribuição** – [docs/guia_contribuicao.md](docs/guia_contribuicao.md)
+- **Especificação OpenAPI** – [docs/openapi.yaml](docs/openapi.yaml) (visualizado via Swagger UI em `/docs/api`)
+- **Swagger UI** – http://localhost:3000/docs/api (disponível após o `npm run dev`)
 
-## 🧪 Suíte de Testes
+## 🧪 Testes Automatizados
 
-- Para rodar os **Testes Unitários** no terminal:
-  ```bash
-  npm run test
-  ```
+```bash
+# Testes unitários
+npm run test
 
-- Para os **Testes End-to-End (E2E)** e API no Playwright:
-  ```bash
-  npx playwright test
-  ```
+# Testes end‑to‑end (Playwright)
+npx playwright test
+```
 
-## 📖 Documentação Adicional
+## 🎯 Roadmap Futuro
 
-- [Guia de Contribuição](docs/guia_contribuicao.md) - Saiba como ajudar no projeto e o padrão de commits.
-- [Especificação OpenAPI / Swagger](docs/openapi.yaml) - Acesse o design da API.
+- Integração com **Sentry** avançada e métricas de performance.
+- **Internacionalização** com `next-i18next` (pt‑BR / en‑US).
+- Deploy **automático** em Vercel via `vercel-action`.
 
-## 🔄 Integração Contínua (CI)
+---
 
-O sistema possui uma esteira (Pipeline) estruturada no GitHub Actions (`.github/workflows/ci.yml`). Em cada Push ou Pull Request, o código é validado por uma matriz contendo testes em multiplas versões de SO e Node, TypeScript type-checking, ESLint, testes unitários, e testes E2E do Playwright.
+*Este README foi criado com imagens ilustrativas geradas por IA e segue as boas práticas de design premium para garantir a melhor primeira impressão.*
