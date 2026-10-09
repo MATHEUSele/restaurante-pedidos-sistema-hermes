@@ -70,6 +70,11 @@ O sistema estará disponível em `http://localhost:3000`. Acesse `/login` com as
   npx playwright test
   ```
 
+## 📖 Documentação Adicional
+
+- [Guia de Contribuição](docs/guia_contribuicao.md) - Saiba como ajudar no projeto e o padrão de commits.
+- [Especificação OpenAPI / Swagger](docs/openapi.yaml) - Acesse o design da API.
+
 ## 🔄 Integração Contínua (CI)
 
 O sistema possui uma esteira (Pipeline) estruturada no GitHub Actions (`.github/workflows/ci.yml`). Em cada Push ou Pull Request, o código é validado por uma matriz contendo testes em multiplas versões de SO e Node, TypeScript type-checking, ESLint, testes unitários, e testes E2E do Playwright.
