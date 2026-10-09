@@ -39,7 +39,17 @@ Este documento serve como um registro contínuo das alterações feitas no proje
 - [x] Testes E2E com Playwright para fluxo principal.
 
 ### Sprint 7 — CI/CD & Melhorias Extras
-- [x] Criar GitHub Actions workflow.
+### Sprint 8-9 — Segurança, UI Premium e Performance
+- [x] Auditar vulnerabilidades e corrigir configs de CI.
+- [x] Hardening de headers (HSTS, CSP).
+- [x] Dark mode (`ThemeToggle`) e tipografia Inter.
+- [x] Migrar imagens para `next/image` otimizadas.
+
+### Sprint 10 — Testes, CI Avançado e Monitoramento
+- [x] Testes de Integração de API (`tests/api/pedidos.spec.ts`).
+- [x] Refatoração do OS Matrix no GitHub Actions para Suporte a Postgres.
+- [x] Utilitário de log estruturado (`app/utils/logger.ts`).
+- [x] Health check com Logging estruturado.
 
 ---
 
