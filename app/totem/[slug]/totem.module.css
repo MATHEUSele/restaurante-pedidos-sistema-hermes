@@ -51,6 +51,7 @@
 }
 
 .productImage {
+  position: relative;
   height: 120px;
   background: #E5E7EB;
   display: flex;
