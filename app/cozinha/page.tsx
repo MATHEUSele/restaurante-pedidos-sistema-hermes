@@ -44,7 +44,7 @@ function CozinhaInterface() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#111827", color: "white", padding: "2rem", fontFamily: "Inter, sans-serif" }}>
+    <div className={styles.container}>
       
       {/* Hamburger Nav */}
       <div style={{ position: "fixed", top: "1rem", right: "1rem", zIndex: 100 }}>
@@ -62,8 +62,8 @@ function CozinhaInterface() {
         )}
       </div>
 
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "1px solid #374151", paddingBottom: "1rem" }}>
-        <h1 style={{ fontSize: "2rem", display: "flex", alignItems: "center", gap: "0.75rem", margin: 0 }}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>
           <ChefHat size={32} color="#F5C518" /> Cozinha - Ao Vivo
         </h1>
         <div style={{ background: "#F5C518", color: "#111827", padding: "0.5rem 1rem", borderRadius: "999px", fontWeight: "bold" }}>
@@ -78,7 +78,7 @@ function CozinhaInterface() {
           <p>A cozinha está tranquila.</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
+        <div className={styles.ordersGrid}>
           {pedidosAtivos.map((pedido) => {
             const minutosEspera = getTempoEspera(pedido.criadoEm);
             const timerColor = getCorTimer(minutosEspera);

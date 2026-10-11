@@ -1,14 +1,18 @@
-"use client"
+"use client";
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react"
+import { Eye, EyeOff, ShieldCheck, Sparkles, QrCode } from "lucide-react"
 import { useToast } from "../context/ToastContext"
 import styles from "./login.module.css"
+import dynamic from "next/dynamic"
+
+const QRScannerModal = dynamic(() => import("../components/QRScannerModal"), { ssr: false })
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
+  const [scannerOpen, setScannerOpen] = useState(false)
   
   // Estados para Login e Cadastro
   const [nome, setNome] = useState("")
@@ -110,6 +114,35 @@ export default function LoginPage() {
     addToast(`Credenciais preenchidas: ${userEmail} / ${pass}`, "info")
   }
 
+  const handleQRScanned = async (scannedText: string) => {
+    setScannerOpen(false)
+    setLoading(true)
+    let token = scannedText.trim()
+    try {
+      if (token.includes("token=")) {
+        const urlObj = new URL(token, window.location.origin)
+        token = urlObj.searchParams.get("token") || token
+      }
+    } catch {
+      // not a full url, treat as raw token
+    }
+
+    addToast("QR Code detectado! Validando acesso único...", "info")
+    const res = await signIn("credentials", {
+      qrToken: token,
+      redirect: false,
+    })
+
+    if (res?.error) {
+      addToast("QR Code inválido, já utilizado ou expirado.", "error")
+      setLoading(false)
+    } else {
+      addToast("Login de Atendente autorizado via QR Code!", "success")
+      router.refresh()
+      router.push("/atendente")
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
@@ -143,6 +176,34 @@ export default function LoginPage() {
             Cadastrar
           </button>
         </div>
+
+        {/* Botão de Acesso Rápido via QR Code para Atendente */}
+        {isLogin && (
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+              width: "100%",
+              padding: "0.85rem",
+              background: "rgba(79, 70, 229, 0.08)",
+              border: "1.5px dashed #4F46E5",
+              color: "#4F46E5",
+              borderRadius: "0.75rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              marginBottom: "1rem",
+              fontSize: "0.95rem",
+              transition: "all 0.2s ease"
+            }}
+          >
+            <QrCode size={20} />
+            Escanear QR Code de Atendente
+          </button>
+        )}
 
         {/* Dica de preenchimento rápido para o usuário no modo Login */}
         {isLogin && (
@@ -269,6 +330,12 @@ export default function LoginPage() {
             {loading ? "Processando..." : (isLogin ? "Entrar no Sistema" : "Criar Minha Conta")}
           </button>
         </form>
+
+        <QRScannerModal
+          isOpen={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+          onScanSuccess={handleQRScanned}
+        />
       </div>
     </div>
   )

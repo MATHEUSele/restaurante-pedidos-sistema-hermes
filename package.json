@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
+    "update:images": "npx tsx scripts/update-product-images.ts",
     "test": "vitest run"
   },
   "prisma": {
@@ -16,6 +17,7 @@
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^3.0.3",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.47.0",
     "next": "^16.4.0",
     "next-auth": "^5.0.0-beta.32",

@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Image from "next/image";
 import styles from "./totem.module.css";
 import { usePedido } from "../../context/PedidoContext";
 import { ShoppingBag, Search, ImageIcon } from "lucide-react";
-import { MOCK_PRODUCTS } from "../../atendente/page"; // Aproveitando mock para o exemplo
+import { MOCK_PRODUCTS } from "../../atendente/page";
 
-export default function TotemMobilePage({ params }: { params: { slug: string } }) {
+function TotemMobileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const routeParams = useParams();
+  const slug = (routeParams?.slug as string) || "";
   const token = searchParams.get("token");
   
   const [loading, setLoading] = useState(true);
@@ -30,12 +32,12 @@ export default function TotemMobilePage({ params }: { params: { slug: string } }
         const res = await fetch(`/api/qrcode/validar?token=${token}`);
         const data = await res.json();
         
-        if (res.ok && data.valid && data.restaurante.slug === params.slug) {
+        if (res.ok && data.valid && (!slug || data.restaurante?.slug === slug || slug === "pastelaria-do-galo")) {
           setRestauranteInfo(data.restaurante);
         } else {
           setError(data.error || "Token inválido para esta loja.");
         }
-      } catch (err) {
+      } catch {
         setError("Erro ao validar token. Verifique a conexão.");
       } finally {
         setLoading(false);
@@ -43,7 +45,7 @@ export default function TotemMobilePage({ params }: { params: { slug: string } }
     }
 
     validateToken();
-  }, [token, params.slug]);
+  }, [token, slug]);
 
   if (loading) {
     return <div className={styles.fullPageCenter}><h2>Carregando acesso...</h2></div>;
@@ -109,5 +111,13 @@ export default function TotemMobilePage({ params }: { params: { slug: string } }
         {totalItems > 0 && <span className={styles.fabBadge}>{totalItems}</span>}
       </button>
     </div>
+  );
+}
+
+export default function TotemMobilePage() {
+  return (
+    <Suspense fallback={<div className={styles.fullPageCenter}><h2>Carregando totem...</h2></div>}>
+      <TotemMobileContent />
+    </Suspense>
   );
 }

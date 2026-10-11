@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import dynamic from "next/dynamic";
 
+import styles from "./adm.module.css";
+
 const QRCodeModal = dynamic(() => import("../components/QRCodeModal"), { ssr: false });
 
 const NAV_LINKS = [
@@ -23,10 +25,10 @@ function AdmPanel() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [qrCodeModal, setQrCodeModal] = useState<{ isOpen: boolean, url: string, loading: boolean }>({ isOpen: false, url: "", loading: false });
 
-  // Exemplo mockado de equipe para o restaurante
+  // Equipe de atendimento da Pastelaria do Galo
   const mockEquipe = [
-    { id: "user-1", nome: "João (Atendente 1)", perfil: "ATENDENTE", restauranteId: "rest-1" },
-    { id: "user-2", nome: "Maria (Atendente 2)", perfil: "ATENDENTE", restauranteId: "rest-1" },
+    { id: "atendente-galo-1", nome: "Atendente Principal", perfil: "ATENDENTE", restauranteId: "rest-pastelaria-do-galo" },
+    { id: "atendente-galo-2", nome: "Atendente Caixa / Balcão", perfil: "ATENDENTE", restauranteId: "rest-pastelaria-do-galo" },
   ];
 
   const aoVivo = pedidos.filter(p => p.status === "PAGO" || p.status === "EM_PREPARO");
@@ -63,11 +65,11 @@ function AdmPanel() {
       if (res.ok) {
         setQrCodeModal({ isOpen: true, url: data.qrCodeUrl, loading: false });
       } else {
-        alert("Erro ao gerar QR Code: " + data.error);
+        alert("Erro ao gerar QR Code: " + (data.error || "Tente novamente"));
         setQrCodeModal({ isOpen: false, url: "", loading: false });
       }
-    } catch (error) {
-      alert("Erro de conexão");
+    } catch {
+      alert("Erro de conexão ao gerar QR Code");
       setQrCodeModal({ isOpen: false, url: "", loading: false });
     }
   };
@@ -75,10 +77,10 @@ function AdmPanel() {
   // Analytics Metrics
   const totalVendas = pedidos.filter(p => p.status !== "CANCELADO").reduce((acc, p) => acc + p.total, 0);
   const pedidosPendentes = aoVivo.length + prontos.length;
-  const ticketsMedio = pedidos.length > 0 ? (totalVendas / pedidos.filter(p => p.status !== "CANCELADO").length) : 0;
+  const ticketsMedio = pedidos.length > 0 ? (totalVendas / (pedidos.filter(p => p.status !== "CANCELADO").length || 1)) : 0;
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#F3F4F6", fontFamily: "Inter, sans-serif" }}>
+    <div className={styles.container}>
       <style>{`
         @keyframes pulse {
           0% { transform: scale(0.95); opacity: 1; }
@@ -87,21 +89,21 @@ function AdmPanel() {
         }
       `}</style>
       
-      {/* Header */}
-      <header style={{ background: "white", padding: "1.5rem 2rem", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontSize: "1.5rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem", color: "#111827" }}>
-          <LayoutDashboard color="#4F46E5" /> Painel ADM - Restaurante
+      {/* Header Responsivo */}
+      <header className={styles.header}>
+        <h1 className={styles.headerTitle}>
+          <LayoutDashboard color="#4F46E5" /> Painel ADM
         </h1>
         
         {/* Hamburger */}
         <div style={{ position: "relative" }}>
-          <button onClick={() => setMenuOpen(o => !o)} style={{ background: "transparent", border: "1px solid #E5E7EB", padding: "0.5rem", borderRadius: "0.5rem", cursor: "pointer" }}>
+          <button onClick={() => setMenuOpen(o => !o)} className={styles.burgerBtn} aria-label="Menu de Navegação">
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           {menuOpen && (
-            <nav style={{ position: "absolute", top: "100%", right: 0, marginTop: "0.5rem", background: "white", borderRadius: "0.75rem", padding: "0.5rem", minWidth: 200, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB", zIndex: 50 }}>
-              {NAV_LINKS.map((link: { href: string; label: string }) => (
-                <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem 0.75rem", color: "#374151", textDecoration: "none", borderRadius: "0.375rem" }}>
+            <nav className={styles.navMenu}>
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className={styles.navLink}>
                   {link.label}
                 </Link>
               ))}
@@ -110,134 +112,138 @@ function AdmPanel() {
         </div>
       </header>
 
-      <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <main className={styles.main}>
         
         {/* Analytics Summary */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          <div style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
-            <span style={{ color: "#6B7280", fontSize: "0.875rem", fontWeight: 600 }}>Total de Vendas (Hoje)</span>
-            <span style={{ color: "#111827", fontSize: "1.5rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatPrice(totalVendas)}</span>
+        <div className={styles.analyticsGrid}>
+          <div className={styles.metricCard}>
+            <span className={styles.metricLabel}>Total de Vendas (Hoje)</span>
+            <span className={styles.metricValue}>{formatPrice(totalVendas)}</span>
           </div>
-          <div style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
-            <span style={{ color: "#6B7280", fontSize: "0.875rem", fontWeight: 600 }}>Pedidos Pendentes</span>
-            <span style={{ color: "#D97706", fontSize: "1.5rem", fontWeight: 700, marginTop: "0.5rem" }}>{pedidosPendentes}</span>
+          <div className={styles.metricCard}>
+            <span className={styles.metricLabel}>Pedidos Pendentes</span>
+            <span className={styles.metricValue} style={{ color: "#D97706" }}>{pedidosPendentes}</span>
           </div>
-          <div style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
-            <span style={{ color: "#6B7280", fontSize: "0.875rem", fontWeight: 600 }}>Ticket Médio</span>
-            <span style={{ color: "#10B981", fontSize: "1.5rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatPrice(ticketsMedio)}</span>
+          <div className={styles.metricCard}>
+            <span className={styles.metricLabel}>Ticket Médio</span>
+            <span className={styles.metricValue} style={{ color: "#10B981" }}>{formatPrice(ticketsMedio)}</span>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", borderBottom: "1px solid #E5E7EB", paddingBottom: "1rem", flexWrap: "wrap" }}>
+        {/* Tabs Responsivas */}
+        <div className={styles.tabsContainer}>
           <button 
             onClick={() => setActiveTab("ao_vivo")}
-            style={{ padding: "0.5rem 1rem", border: "none", background: "transparent", fontSize: "1.1rem", fontWeight: 600, color: activeTab === "ao_vivo" ? "#4F46E5" : "#6B7280", cursor: "pointer", borderBottom: activeTab === "ao_vivo" ? "2px solid #4F46E5" : "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            className={`${styles.tabBtn} ${activeTab === "ao_vivo" ? styles.tabBtnActive : ""}`}
           >
             <Clock size={18} />
             Ao Vivo 
-            <span style={{ background: activeTab === "ao_vivo" ? "#4F46E5" : "#E5E7EB", color: activeTab === "ao_vivo" ? "white" : "#4B5563", padding: "0.1rem 0.5rem", borderRadius: "999px", fontSize: "0.75rem", marginLeft: "0.25rem" }}>{aoVivo.length}</span>
+            <span className={`${styles.tabBadge} ${activeTab === "ao_vivo" ? styles.tabBadgeActive : ""}`}>{aoVivo.length}</span>
           </button>
           <button 
             onClick={() => setActiveTab("prontos")}
-            style={{ padding: "0.5rem 1rem", border: "none", background: "transparent", fontSize: "1.1rem", fontWeight: 600, color: activeTab === "prontos" ? "#4F46E5" : "#6B7280", cursor: "pointer", borderBottom: activeTab === "prontos" ? "2px solid #4F46E5" : "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            className={`${styles.tabBtn} ${activeTab === "prontos" ? styles.tabBtnActive : ""}`}
           >
             <CheckCircle size={18} />
             Prontos / Entregar
-            <span style={{ background: activeTab === "prontos" ? "#4F46E5" : "#E5E7EB", color: activeTab === "prontos" ? "white" : "#4B5563", padding: "0.1rem 0.5rem", borderRadius: "999px", fontSize: "0.75rem", marginLeft: "0.25rem" }}>{prontos.length}</span>
+            <span className={`${styles.tabBadge} ${activeTab === "prontos" ? styles.tabBadgeActive : ""}`}>{prontos.length}</span>
           </button>
           <button 
             onClick={() => setActiveTab("historico")}
-            style={{ padding: "0.5rem 1rem", border: "none", background: "transparent", fontSize: "1.1rem", fontWeight: 600, color: activeTab === "historico" ? "#4F46E5" : "#6B7280", cursor: "pointer", borderBottom: activeTab === "historico" ? "2px solid #4F46E5" : "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            className={`${styles.tabBtn} ${activeTab === "historico" ? styles.tabBtnActive : ""}`}
           >
             <History size={18} />
             Histórico
-            <span style={{ background: activeTab === "historico" ? "#4F46E5" : "#E5E7EB", color: activeTab === "historico" ? "white" : "#4B5563", padding: "0.1rem 0.5rem", borderRadius: "999px", fontSize: "0.75rem", marginLeft: "0.25rem" }}>{historico.length}</span>
+            <span className={`${styles.tabBadge} ${activeTab === "historico" ? styles.tabBadgeActive : ""}`}>{historico.length}</span>
           </button>
           <button 
             onClick={() => setActiveTab("equipe")}
-            style={{ padding: "0.5rem 1rem", border: "none", background: "transparent", fontSize: "1.1rem", fontWeight: 600, color: activeTab === "equipe" ? "#4F46E5" : "#6B7280", cursor: "pointer", borderBottom: activeTab === "equipe" ? "2px solid #4F46E5" : "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            className={`${styles.tabBtn} ${activeTab === "equipe" ? styles.tabBtnActive : ""}`}
           >
             <Users size={18} />
-            Equipe / Acessos
+            Equipe / Acessos QR
           </button>
         </div>
 
         {/* List / Equipe */}
         {activeTab === "equipe" ? (
           <div>
-            <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Gestão de Atendentes (Totem)</h2>
-            <p style={{ color: "#6B7280", marginBottom: "2rem" }}>Gere um QR Code para vincular o celular do atendente diretamente a este restaurante.</p>
+            <h2 style={{ color: "var(--text, #111827)", marginBottom: "0.5rem", fontSize: "1.35rem" }}>Gestão de Atendentes</h2>
+            <p style={{ color: "var(--text-muted, #6B7280)", marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+              Gere um QR Code de uso único para sincronizar o celular do atendente diretamente a este restaurante sem precisar digitar senha.
+            </p>
             
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
-              {mockEquipe.map((membro: any) => (
-                <div key={membro.id} style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className={styles.teamGrid}>
+              {mockEquipe.map((membro) => (
+                <div key={membro.id} className={styles.teamCard}>
                   <div>
-                    <h3 style={{ margin: 0, color: "#111827" }}>{membro.nome}</h3>
-                    <span style={{ fontSize: "0.875rem", color: "#6B7280" }}>{membro.perfil}</span>
+                    <h3 style={{ margin: "0 0 0.25rem 0", color: "var(--text, #111827)", fontSize: "1.05rem" }}>{membro.nome}</h3>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-muted, #6B7280)" }}>{membro.perfil}</span>
                   </div>
                   <button 
                     onClick={() => handleGenerateQRCode(membro.id, membro.restauranteId)}
-                    style={{ background: "#4F46E5", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: 600 }}
+                    className={styles.btnAction}
+                    style={{ background: "#4F46E5", color: "white" }}
                   >
-                    <QrCode size={18} /> Gerar Acesso
+                    <QrCode size={18} /> Gerar Acesso QR
                   </button>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className={styles.ordersList}>
             {displayedPedidos.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "3rem", color: "#6B7280" }}>
+              <div className={styles.emptyState}>
                 Nenhum pedido encontrado nesta aba.
               </div>
             ) : (
               displayedPedidos.map((pedido: any) => (
-                <div key={pedido.id} style={{ background: "white", padding: "1.5rem", borderRadius: "1rem", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", position: "relative" }}>
+                <div key={pedido.id} className={styles.orderCard}>
                   
                   {pedido.status === "PRONTO" && (
-                    <div style={{ position: "absolute", top: -6, right: -6, width: 14, height: 14, borderRadius: "50%", background: "#10B981", animation: "pulse 1.5s infinite" }} />
+                    <div style={{ position: "absolute", top: -5, right: -5, width: 12, height: 12, borderRadius: "50%", background: "#10B981", animation: "pulse 1.5s infinite" }} />
                   )}
 
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                      <h3 style={{ margin: 0, fontSize: "1.25rem" }}>
-                        {pedido.clienteNome ? pedido.clienteNome.toUpperCase() : `Pedido #${pedido.id}`}
+                  <div className={styles.orderMain}>
+                    <div className={styles.orderHeader}>
+                      <h3 className={styles.orderTitle}>
+                        {pedido.clienteNome ? pedido.clienteNome.toUpperCase() : `Pedido #${pedido.id.slice(0, 5)}`}
                       </h3>
                       <span style={{ 
-                        background: statusColors[pedido.status].bg, 
-                        color: statusColors[pedido.status].text,
-                        padding: "0.25rem 0.75rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: "bold" 
+                        background: statusColors[pedido.status]?.bg || "#E5E7EB", 
+                        color: statusColors[pedido.status]?.text || "#374151",
+                        padding: "0.2rem 0.65rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: "bold" 
                       }}>
                         {pedido.status}
                       </span>
-                      <span style={{ color: "#9CA3AF", fontSize: "0.875rem" }}>{formatTime(pedido.createdAt)}</span>
+                      <span style={{ color: "#9CA3AF", fontSize: "0.85rem" }}>{formatTime(pedido.createdAt || pedido.criadoEm)}</span>
                       {pedido.agendadoPara && (
                         <span style={{ background: "#EA580C", color: "white", padding: "0.15rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold" }}>
                           Agendado: {pedido.agendadoPara}
                         </span>
                       )}
                     </div>
-                    <p style={{ margin: 0, color: "#6B7280" }}>
+                    <p className={styles.orderItems}>
                       {pedido.itens?.map((i: any) => `${i.quantidade}x ${i.nomeProduto || i.produto?.nome}`).join(", ")}
                     </p>
                     {pedido.nota && (
-                      <p style={{ margin: "0.5rem 0 0 0", color: "#D97706", fontSize: "0.875rem", fontWeight: 500 }}>
+                      <p className={styles.orderNote}>
                         Nota: {pedido.nota}
                       </p>
                     )}
                   </div>
 
-                  <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem" }}>
-                    <span style={{ fontSize: "1.25rem", fontWeight: 700, color: "#111827" }}>
+                  <div className={styles.orderActions}>
+                    <span className={styles.orderPrice}>
                       {formatPrice(pedido.total)}
                     </span>
                     
                     {pedido.status === "PRONTO" && activeTab === "prontos" && (
                       <button 
                         onClick={() => atualizarStatus(pedido.id, "ENTREGUE")}
-                        style={{ padding: "0.5rem 1rem", background: "#10B981", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
+                        className={styles.btnAction}
+                        style={{ background: "#10B981", color: "white" }}
                       >
                         <CheckCircle size={16} /> Entregar
                       </button>
@@ -245,7 +251,8 @@ function AdmPanel() {
                     {pedido.status === "PAGO" && activeTab === "ao_vivo" && (
                        <button 
                        onClick={() => atualizarStatus(pedido.id, "CANCELADO")}
-                       style={{ padding: "0.5rem 1rem", background: "white", color: "#EF4444", border: "1px solid #EF4444", borderRadius: "0.5rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
+                       className={styles.btnAction}
+                       style={{ background: "white", color: "#EF4444", border: "1px solid #EF4444" }}
                      >
                        <XCircle size={16} /> Cancelar
                      </button>

@@ -16,7 +16,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Busca o restaurante para pegar o slug (nome formatado simplificado por hora)
+    // Busca ou garante usuário atendente válido
+    let targetUser = await prisma.usuario.findUnique({
+      where: { id: usuarioId }
+    })
+
+    if (!targetUser) {
+      targetUser = await prisma.usuario.findFirst({
+        where: { restauranteId, perfil: "ATENDENTE" }
+      })
+    }
+
+    if (!targetUser) {
+      targetUser = await prisma.usuario.create({
+        data: {
+          nome: "Atendente do Restaurante",
+          email: `atendente-${Date.now()}@restaurante.local`,
+          perfil: "ATENDENTE",
+          restauranteId,
+        }
+      })
+    }
+
+    // Busca o restaurante para pegar o slug
     const restaurante = await prisma.restaurante.findUnique({
       where: { id: restauranteId }
     })
@@ -25,7 +47,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Restaurante not found" }, { status: 404 })
     }
 
-    // Cria o slug simplificado a partir do nome
     const slug = restaurante.nome.toLowerCase().replace(/\s+/g, '-')
 
     const expiresAt = new Date()
@@ -33,17 +54,25 @@ export async function POST(req: Request) {
 
     const qrCode = await prisma.qRCode.create({
       data: {
-        usuarioId,
+        usuarioId: targetUser.id,
         restauranteId,
         slug,
         expiresAt,
+        ativo: true,
       }
     })
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
-    const qrCodeUrl = `${baseUrl}/totem/${slug}?token=${qrCode.token}`
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000"
+    const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https")
+    const baseUrl = process.env.NEXTAUTH_URL || `${protocol}://${host}`
+    const qrCodeUrl = `${baseUrl}/login/qr?token=${qrCode.token}`
 
-    return NextResponse.json({ qrCodeUrl, token: qrCode.token, expiresAt }, { status: 201 })
+    return NextResponse.json({ 
+      qrCodeUrl, 
+      token: qrCode.token, 
+      expiresAt,
+      usuarioNome: targetUser.nome,
+    }, { status: 201 })
   } catch (error) {
     console.error("Error generating QR Code:", error)
     return NextResponse.json({ error: "Failed to generate QR Code" }, { status: 500 })

@@ -642,3 +642,56 @@
   color: var(--text, #111827);
   font-weight: 700;
 }
+
+.mobileCartBar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #7A1E2E;
+  color: white;
+  padding: 0.85rem 1.25rem;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 40;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 2px solid #F5C518;
+}
+
+.mobileCartInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileCartCount {
+  font-size: 0.8rem;
+  color: #FCD34D;
+  font-weight: 600;
+}
+
+.mobileCartTotal {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.mobileCartBtn {
+  background: #10B981;
+  color: white;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .mobileCartBar {
+    display: flex;
+  }
+}
+

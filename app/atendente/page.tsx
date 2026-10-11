@@ -19,33 +19,37 @@ const NAV_LINKS = [
 const MOCK_CATEGORIES = ["Salgados", "Especiais", "Doces", "Bebidas"];
 
 export const MOCK_PRODUCTS = [
-  { id: "1", name: "Pastel de Carne", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80" },
-  { id: "2", name: "Pastel de Queijo", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80" },
-  { id: "3", name: "Pastel de Frango", price: 8.0, category: "Salgados", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80" },
-  { id: "4", name: "Pastel de Camarão", price: 13.0, category: "Salgados", image: "https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&q=80" },
-  { id: "5", name: "Pastel de Carne de Sol", price: 11.0, category: "Salgados", image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80" },
+  // Salgados
+  { id: "1", name: "Pastel de Carne", price: 8.0, category: "Salgados", image: "/images/products/pastel-de-carne.jpg" },
+  { id: "2", name: "Pastel de Queijo", price: 8.0, category: "Salgados", image: "/images/products/pastel-de-queijo.jpg" },
+  { id: "3", name: "Pastel de Frango", price: 8.0, category: "Salgados", image: "/images/products/pastel-de-frango.jpg" },
+  { id: "4", name: "Pastel de Camarão", price: 13.0, category: "Salgados", image: "/images/products/pastel-de-camarao.jpg" },
+  { id: "5", name: "Pastel de Carne de Sol", price: 11.0, category: "Salgados", image: "/images/products/pastel-carne-sol.jpg" },
   
-  { id: "6", name: "Carne de Sol + Queijo", price: 13.0, category: "Especiais", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80" },
-  { id: "7", name: "Carne de Sol + Catupiry", price: 13.0, category: "Especiais", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80" },
-  { id: "8", name: "Frango + Queijo", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" },
-  { id: "9", name: "Frango + Catupiry", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&q=80" },
-  { id: "10", name: "Carne + Queijo", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80" },
-  { id: "11", name: "Carne + Catupiry", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1603064752734-4c48eff53d05?w=400&q=80" },
-  { id: "12", name: "Camarão + Catupiry", price: 15.0, category: "Especiais", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" },
-  { id: "13", name: "Camarão + Queijo", price: 15.0, category: "Especiais", image: "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=400&q=80" },
-  { id: "14", name: "2 Queijos", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80" },
-  { id: "15", name: "Misto", price: 9.0, category: "Especiais", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80" },
+  // Especiais (conforme solicitado: todos com nome pastel e tipo especial)
+  { id: "6", name: "Pastel Especial de Carne de Sol + Queijo", price: 13.0, category: "Especiais", image: "/images/products/pastel-especial.jpg" },
+  { id: "7", name: "Pastel Especial de Carne de Sol + Catupiry", price: 13.0, category: "Especiais", image: "/images/products/pastel-especial.jpg" },
+  { id: "8", name: "Pastel Especial de Frango + Queijo", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-frango.jpg" },
+  { id: "9", name: "Pastel Especial de Frango + Catupiry", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-frango.jpg" },
+  { id: "10", name: "Pastel Especial de Carne + Queijo", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-carne.jpg" },
+  { id: "11", name: "Pastel Especial de Carne + Catupiry", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-carne.jpg" },
+  { id: "12", name: "Pastel Especial de Camarão + Catupiry", price: 15.0, category: "Especiais", image: "/images/products/pastel-de-camarao.jpg" },
+  { id: "13", name: "Pastel Especial de Camarão + Queijo", price: 15.0, category: "Especiais", image: "/images/products/pastel-de-camarao.jpg" },
+  { id: "14", name: "Pastel Especial 2 Queijos", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-queijo.jpg" },
+  { id: "15", name: "Pastel Especial Misto (Presunto e Queijo)", price: 9.0, category: "Especiais", image: "/images/products/pastel-de-queijo.jpg" },
 
-  { id: "16", name: "Banana c/ Nutella", price: 12.0, category: "Doces", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80" },
-  { id: "17", name: "Romeu e Julieta", price: 12.0, category: "Doces", image: "https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=400&q=80" },
+  // Doces
+  { id: "16", name: "Pastel Doce de Banana com Nutella", price: 12.0, category: "Doces", image: "/images/products/pastel-doce.jpg" },
+  { id: "17", name: "Pastel Doce de Romeu e Julieta", price: 12.0, category: "Doces", image: "/images/products/pastel-doce.jpg" },
 
-  { id: "18", name: "Coca-Cola Zero", price: 6.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80" },
-  { id: "19", name: "Coca-Cola Lata", price: 6.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&q=80" },
-  { id: "20", name: "Coca-Cola 1 Litro", price: 10.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&q=80" },
-  { id: "21", name: "Suco Maracujá 300ml", price: 4.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=400&q=80" },
-  { id: "22", name: "Suco Maracujá 500ml", price: 5.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&q=80" },
-  { id: "23", name: "Caldo de Cana 300ml", price: 3.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&q=80" },
-  { id: "24", name: "Caldo de Cana 500ml", price: 4.0, category: "Bebidas", image: "https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&q=80" },
+  // Bebidas
+  { id: "18", name: "Coca-Cola Zero (Lata)", price: 6.0, category: "Bebidas", image: "/images/products/coca-cola.jpg" },
+  { id: "19", name: "Coca-Cola Original (Lata)", price: 6.0, category: "Bebidas", image: "/images/products/coca-cola.jpg" },
+  { id: "20", name: "Coca-Cola 1 Litro", price: 10.0, category: "Bebidas", image: "/images/products/coca-cola.jpg" },
+  { id: "21", name: "Suco de Maracujá 300ml", price: 4.0, category: "Bebidas", image: "/images/products/suco-maracuja.jpg" },
+  { id: "22", name: "Suco de Maracujá 500ml", price: 5.0, category: "Bebidas", image: "/images/products/suco-maracuja.jpg" },
+  { id: "23", name: "Caldo de Cana 300ml", price: 3.0, category: "Bebidas", image: "/images/products/caldo-de-cana.jpg" },
+  { id: "24", name: "Caldo de Cana 500ml", price: 4.0, category: "Bebidas", image: "/images/products/caldo-de-cana.jpg" },
 ];
 
 type CartItem = {
@@ -463,6 +467,21 @@ function AtendenteInterface() {
               Novo Pedido
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Barra Flutuante de Carrinho para Celular */}
+      {cart.length > 0 && activeTab === "cardapio" && (
+        <div className={styles.mobileCartBar}>
+          <div className={styles.mobileCartInfo}>
+            <span className={styles.mobileCartCount}>
+              🛒 {cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? "item" : "itens"}
+            </span>
+            <span className={styles.mobileCartTotal}>{formatPrice(total)}</span>
+          </div>
+          <button className={styles.mobileCartBtn} onClick={() => setCheckoutModal(true)}>
+            <ShoppingCart size={18} /> Finalizar Pedido
+          </button>
         </div>
       )}
     </div>
