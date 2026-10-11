@@ -15,8 +15,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
-        const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email as string },
+        const identifier = (credentials.email as string).trim()
+        const rawPassword = (credentials.password as string).trim()
+
+        const user = await prisma.usuario.findFirst({
+          where: {
+            OR: [
+              { email: { equals: identifier, mode: "insensitive" } },
+              { nome: { equals: identifier, mode: "insensitive" } },
+              ...(identifier.toLowerCase() === "admin" ||
+              identifier.toLowerCase() === "adm"
+                ? [
+                    { email: "adm@gmail.com" },
+                    { email: "admin@hermes.com" },
+                    { email: "admin@gmail.com" },
+                  ]
+                : []),
+            ],
+          },
         })
 
         if (!user || !user.senha) {
@@ -24,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const passwordsMatch = await bcrypt.compare(
-          credentials.password as string,
+          rawPassword,
           user.senha
         )
 

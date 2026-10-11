@@ -6,28 +6,29 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Iniciando seed do banco de dados...')
 
-  const adminEmail = 'adm@gmail.com'
-  const adminSenha = '123'
-  
-  const existingAdmin = await prisma.usuario.findUnique({
-    where: { email: adminEmail }
-  })
+  const defaultAccounts = [
+    { nome: 'Admin DEV', email: 'adm@gmail.com', senha: '123', perfil: 'DEV' },
+    { nome: 'Administrador Hermes', email: 'admin@hermes.com', senha: '123', perfil: 'ADM' },
+    { nome: 'Administrador', email: 'admin@gmail.com', senha: '123', perfil: 'ADM' },
+  ]
 
-  if (!existingAdmin) {
-    console.log(`Admin ${adminEmail} não encontrado. Criando...`)
-    const hashedPassword = await bcrypt.hash(adminSenha, 10)
-    
-    await prisma.usuario.create({
-      data: {
-        nome: 'Admin',
-        email: adminEmail,
+  for (const acc of defaultAccounts) {
+    const hashedPassword = await bcrypt.hash(acc.senha, 10)
+    await prisma.usuario.upsert({
+      where: { email: acc.email },
+      update: {
+        nome: acc.nome,
         senha: hashedPassword,
-        perfil: 'DEV'
-      }
+        perfil: acc.perfil,
+      },
+      create: {
+        nome: acc.nome,
+        email: acc.email,
+        senha: hashedPassword,
+        perfil: acc.perfil,
+      },
     })
-    console.log('Admin criado com sucesso!')
-  } else {
-    console.log(`Admin ${adminEmail} já existe no banco. Pulando criação.`)
+    console.log(`Conta ${acc.email} garantida com perfil ${acc.perfil} e senha ${acc.senha}!`)
   }
 
   console.log('Seed finalizado.')
