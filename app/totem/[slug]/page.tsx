@@ -8,6 +8,30 @@ import { usePedido } from "../../context/PedidoContext";
 import { ShoppingBag, Search, ImageIcon } from "lucide-react";
 import { MOCK_PRODUCTS } from "../../atendente/page";
 
+function TotemProductImage({ src, alt }: { src?: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#9CA3AF' }}>
+        <ImageIcon size={32} opacity={0.4} />
+      </div>
+    );
+  }
+
+  return (
+    <Image 
+      src={src} 
+      alt={alt} 
+      fill 
+      unoptimized
+      sizes="(max-width: 640px) 50vw, 200px"
+      style={{ objectFit: 'cover' }}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 function TotemMobileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,11 +115,7 @@ function TotemMobileContent() {
           {MOCK_PRODUCTS.map(product => (
             <div key={product.id} className={styles.productCard} onClick={() => addToCart(product)}>
               <div className={styles.productImage}>
-                {product.image ? (
-                  <Image src={product.image} alt={product.name} fill style={{ objectFit: 'cover' }} />
-                ) : (
-                  <ImageIcon size={32} opacity={0.3} />
-                )}
+                <TotemProductImage src={product.image} alt={product.name} />
               </div>
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>

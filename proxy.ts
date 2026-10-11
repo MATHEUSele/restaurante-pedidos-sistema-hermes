@@ -10,7 +10,13 @@ export default auth((req) => {
   const isLoginPage = url.pathname === "/login"
   const isTotemPage = url.pathname.startsWith("/totem")
   const isPublicApi = url.pathname.startsWith("/api/qrcode/validar") || url.pathname.startsWith("/api/auth") || url.pathname.startsWith("/api/health")
-  
+  const isStaticAsset = url.pathname.startsWith("/images") || url.pathname.startsWith("/favicon.ico") || /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)
+
+  // Libera assets estáticos imediatamente
+  if (isStaticAsset) {
+    return NextResponse.next()
+  }
+
   // Redireciona não autenticados para login
   if (!isAuth && !isLoginPage && !isTotemPage && !isPublicApi && url.pathname !== "/") {
     return NextResponse.redirect(new URL("/login", req.url))
@@ -30,8 +36,7 @@ export default auth((req) => {
   }
 })
 
-
 // Aplica o middleware apenas nas rotas necessárias
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

@@ -57,6 +57,30 @@ type CartItem = {
   quantity: number;
 };
 
+function ProductCardImage({ src, alt }: { src?: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#9CA3AF' }}>
+        <ImageIcon size={48} opacity={0.4} />
+      </div>
+    );
+  }
+
+  return (
+    <Image 
+      src={src} 
+      alt={alt} 
+      fill 
+      unoptimized
+      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
+      style={{ objectFit: 'cover' }}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 function AtendenteInterface() {
   const { pedidos, criarPedido, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   
@@ -247,17 +271,7 @@ function AtendenteInterface() {
                 <div key={product.id} className={`${styles.productCard} ${styles.animateFadeIn}`}>
                   <span className={styles.categoryBadge}>{product.category}</span>
                   <div className={styles.productImage}>
-                    {product.image ? (
-                      <Image 
-                        src={product.image} 
-                        alt={product.name} 
-                        fill 
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
-                        style={{ objectFit: 'cover' }} 
-                      />
-                    ) : (
-                      <ImageIcon size={48} opacity={0.3} />
-                    )}
+                    <ProductCardImage src={product.image} alt={product.name} />
                   </div>
                   <div className={styles.productInfo}>
                     <h3 className={styles.productName}>{product.name}</h3>
