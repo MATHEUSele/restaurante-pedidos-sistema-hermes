@@ -9,7 +9,7 @@ export default auth((req) => {
   
   const isLoginPage = url.pathname === "/login"
   const isTotemPage = url.pathname.startsWith("/totem")
-  const isPublicApi = url.pathname.startsWith("/api/qrcode/validar") || url.pathname.startsWith("/api/auth")
+  const isPublicApi = url.pathname.startsWith("/api/qrcode/validar") || url.pathname.startsWith("/api/auth") || url.pathname.startsWith("/api/health")
   
   // Redireciona não autenticados para login
   if (!isAuth && !isLoginPage && !isTotemPage && !isPublicApi && url.pathname !== "/") {
