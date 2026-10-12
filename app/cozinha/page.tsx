@@ -15,7 +15,11 @@ const NAV_LINKS = [
   { href: "/atendente", label: "🧾 Atendente" },
 ];
 
+import { useSession, signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+
 function CozinhaInterface() {
+  const { data: session } = useSession();
   const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(new Date());
@@ -52,20 +56,47 @@ function CozinhaInterface() {
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         {menuOpen && (
-          <nav style={{ position: "absolute", top: "100%", right: 0, marginTop: "0.5rem", background: "#1F2937", borderRadius: "0.75rem", padding: "0.75rem", minWidth: 200, display: "flex", flexDirection: "column", gap: "0.25rem", border: "1px solid #374151", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)" }}>
-            {NAV_LINKS.map(link => (
-              <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem", color: "white", textDecoration: "none", borderRadius: "0.5rem", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "#374151"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
-                {link.label}
-              </Link>
-            ))}
+          <nav style={{ position: "absolute", top: "100%", right: 0, marginTop: "0.5rem", background: "#1F2937", borderRadius: "0.75rem", padding: "0.75rem", minWidth: 220, display: "flex", flexDirection: "column", gap: "0.25rem", border: "1px solid #374151", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)" }}>
+            <p style={{ margin: "0 0 0.5rem 0", padding: "0.25rem 0.5rem", borderBottom: "1px solid #374151", color: "#9CA3AF", fontSize: "0.8rem", fontWeight: "bold" }}>
+              {session?.user?.name ? `Olá, ${session.user.name}` : "Equipe da Cozinha"}
+              <span style={{ display: "block", fontSize: "0.7rem", color: "#6B7280", fontWeight: "normal" }}>
+                Perfil: {session?.user?.perfil || "COZINHA"}
+              </span>
+            </p>
+            <Link href="/" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem", color: "white", textDecoration: "none", borderRadius: "0.5rem", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "#374151"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+              🏠 Página Inicial
+            </Link>
+            {(session?.user?.perfil === "ADM" || session?.user?.perfil === "DEV") && (
+              <>
+                <Link href="/adm" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem", color: "white", textDecoration: "none", borderRadius: "0.5rem", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "#374151"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+                  🛠️ Painel ADM
+                </Link>
+                <Link href="/atendente" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "0.5rem", color: "white", textDecoration: "none", borderRadius: "0.5rem", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "#374151"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+                  🧾 Atendente
+                </Link>
+              </>
+            )}
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "0.5rem", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9rem", borderRadius: "0.5rem" }}
+              onMouseOver={(e) => e.currentTarget.style.background = "#374151"}
+              onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
+            >
+              <LogOut size={16} /> Sair da Cozinha
+            </button>
           </nav>
         )}
       </div>
 
       <header className={styles.header}>
-        <h1 className={styles.title}>
-          <ChefHat size={32} color="#F5C518" /> Cozinha - Ao Vivo
-        </h1>
+        <div>
+          <span style={{ fontSize: "0.75rem", color: "#9CA3AF", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Sistema Hermes &bull; KDS Display
+          </span>
+          <h1 className={styles.title} style={{ margin: "0.2rem 0 0 0" }}>
+            <ChefHat size={32} color="#F5C518" /> Cozinha ao Vivo
+          </h1>
+        </div>
         <div style={{ background: "#F5C518", color: "#111827", padding: "0.5rem 1rem", borderRadius: "999px", fontWeight: "bold" }}>
           {pedidosAtivos.length} Pedidos na Fila
         </div>

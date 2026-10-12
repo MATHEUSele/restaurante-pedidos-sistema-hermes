@@ -1,85 +1,168 @@
-# Hermes – Sistema de Pedidos 🍽️
+<div align="center">
 
-![Hero Image](file:///C:/Users/matheuss/.gemini/antigravity-ide/brain/b9665d40-b7a1-45c1-811e-4a1936df87ed/hermes_dashboard_hero_1791559295461.jpg)
+# ⚡ Sistema Hermes
+### Plataforma Inteligente de Gestão de Pedidos e Atendimento em Tempo Real
 
-> **Um sistema completo, elegante e pronto para produção**
+[![Next.js](https://img.shields.io/badge/Next.js-16.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
+[![NextAuth](https://img.shields.io/badge/Auth.js-NextAuth%20v5-purple?style=for-the-badge)](https://authjs.dev/)
+[![Docker](https://img.shields.io/badge/Docker-Postgres-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
-O **Hermes** possibilita a gestão de pedidos e filas (KDS) para restaurantes de fast‑food e lanchonetes, trazendo uma **UX premium** com modo escuro, micro‑animações suaves e um design responsivo que se adapta a desktops, tablets e smartphones.
+<br />
+
+<img src="./docs/images/hermes-hero-banner.jpg" alt="Apresentação Sistema Hermes" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+
+<br />
+<br />
+
+</div>
 
 ---
 
-## ✨ Principais Funcionalidades
+## 📖 O que é o Sistema Hermes?
 
-- **Painel Administrativo (ADM)** – visão geral de vendas, tickets médios, controle de permissões e geração de QR Codes para totens.
-- **Painel da Cozinha (KDS)** – lista de pedidos em tempo real com status colorido e animações de transição.
-- **Totem/PDV** – interface de auto‑atendimento com catálogo de produtos, filtro por categoria e checkout rápido.
-- **Autenticação RBAC** – segurança via `next‑auth` com proteção contra CSRF e cabeçalhos hardening.
-- **Tema Dinâmico** – troca instantânea entre modo **claro** e **escuro** usando o componente flutuante abaixo.
+O **Sistema Hermes** é um ecossistema completo e multi-tenant para automação gastronômica, projetado para extinguir filas de espera, agilizar o preparo na cozinha e conectar o salão à gerência em tempo real.
 
-![Theme Toggle Demo](file:///C:/Users/matheuss/.gemini/antigravity-ide/brain/b9665d40-b7a1-45c1-811e-4a1936df87ed/theme_toggle_demo_1791559314207.jpg)
+Diferente de sistemas convencionais monolíticos, o Hermes atua em **4 frentes sincronizadas**:
+
+1. **📱 Totem do Cliente & Cardápio Digital Mobile:** O cliente lê o QR Code da mesa e acessa o cardápio ilustrado em alta resolução, monta o carrinho e envia o pedido sem precisar chamar o garçom.
+2. **🧾 Terminal do Atendente (Mobile / Balcão):** Garçons utilizam qualquer celular ou tablet para lançar pedidos no salão, acompanhar comandas e visualizar instantaneamente alertas de pratos prontos para retirada.
+3. **🍳 KDS Cozinha (Kitchen Display System):** A cozinha acompanha a esteira de pedidos ao vivo, com separação cromática por tempo de espera (Pendente, Em Preparo, Pronto) e notificações sonoras.
+4. **📊 Painel Administrativo:** Gestores visualizam métricas financeiras em tempo real, gerenciam a equipe e emitem **QR Codes de uso único** com expiração automática para autenticar garçons em seus celulares.
+
+---
+
+## 🔄 Fluxo de Operação Integrada
+
+<div align="center">
+  <img src="./docs/images/hermes-system-flow.jpg" alt="Fluxo Operacional do Sistema Hermes" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
+
+```mermaid
+flowchart LR
+    A["📱 Cliente / QR Mesa"] -->|Envia Pedido| D[("⚡ Hub Central Hermes")]
+    B["🧾 Garçom / Celular"] -->|Lança Pedido| D
+    D -->|Tempo Real| C["🍳 KDS Cozinha"]
+    C -->|Marca como Pronto| D
+    D -->|Alerta de Entrega| B
+    D -->|Métricas & Vendas| E["📊 Painel ADM"]
+```
+
+---
+
+## 🥟 Case de Sucesso Modelado: Pastelaria do Galo
+
+Para validação prática do sistema em ambiente real, o Hermes conta com a **Pastelaria do Galo** como case modelo implementado:
+
+- Mais de 20 opções de pastéis artesanais (Salgados, Especiais, Doces) e bebidas (Caldo de Cana, Sucos, Refrigerantes).
+- Fotos profissionais de propaganda para cada produto em alta definição.
+- Sincronização entre balcão, totens e fritura.
+
+---
+
+## 🔒 Segurança, Permissões (RBAC) e Tempo de Sessão
+
+O sistema adota autenticação robusta via **Auth.js / NextAuth v5** com controle estrito de rotas por papel:
+
+| Perfil | Destino Principal | Permissões & Movimentação |
+| :--- | :--- | :--- |
+| **`ADM`** | `/adm` | Acesso total e livre trânsito entre todas as áreas (`/cozinha`, `/atendente`, métricas e QR Codes). |
+| **`ATENDENTE`** | `/atendente` | Acesso exclusivo ao terminal de pedidos. Bloqueado de acessar `/adm` e `/cozinha`. |
+| **`COZINHA`** | `/cozinha` | Acesso exclusivo ao display KDS de produção. Bloqueado de acessar `/adm`. |
+| **`DEV`** | `/dev` | Acesso irrestrito a testes, simuladores de múltiplos estabelecimentos e endpoints. |
+
+### ⏱️ Política de Sessão dos Atendentes
+- **Duração do Turno:** Sessão ativa por até **8 horas** (28.800 segundos), expirando automaticamente ao término da jornada de trabalho.
+- **Login Instantâneo por QR Code:** O ADM gera um QR Code no painel que expira em 24h ou assim que é escaneado (**Uso Único**). Quando o atendente aponta a câmera do celular na tela de login, o acesso é liberado instantaneamente sem precisar digitar senhas.
+
+---
 
 ## 🛠️ Stack Tecnológica
 
-| Camada | Tecnologia |
-|--------|------------|
-| Frontend | **Next.js 14** (App Router) • React 18 • TypeScript • `next‑themes` • `framer‑motion` |
-| UI | CSS custom properties (variáveis HSL), micro‑animações, layout Grid/Flex, fonte **Inter** |
-| Backend | API Routes do Next.js • Prisma ORM • PostgreSQL |
-| Testes | Vitest (unit) • Playwright (E2E) |
-| CI/CD | GitHub Actions – matriz Node 18/20 × Ubuntu/Windows, cache de dependências, deploy preview Vercel |
-| Monitoramento | Sentry (client & server) • Endpoint `/api/health` |
-
-## 🚀 Como Executar Localmente
-
-```bash
-# Clone o repositório
-git clone https://github.com/MATHEUSele/restaurante-pedidos-sistema-hermes.git
-cd restaurante-pedidos-sistema-hermes
-
-# Instale as dependências
-npm install
-
-# Configure variáveis de ambiente
-cp .env.example .env
-# edite .env (DATABASE_URL, NEXTAUTH_SECRET, etc.)
-
-# Prepare o banco de dados
-npx prisma generate
-npx prisma db push
-npm run seed   # opcional – insere dados de exemplo
-
-# Inicie a aplicação
-npm run dev
-```
-
-Acesse `http://localhost:3000` e explore as rotas:
-- `/login` – autenticação
-- `/adm` – painel administrativo
-- `/cozinha` – KDS
-- `/atendente` – totem
-
-## 📚 Documentação
-
-- **Guia de Contribuição** – [docs/guia_contribuicao.md](docs/guia_contribuicao.md)
-- **Especificação OpenAPI** – [docs/openapi.yaml](docs/openapi.yaml) (visualizado via Swagger UI em `/docs/api`)
-- **Swagger UI** – http://localhost:3000/docs/api (disponível após o `npm run dev`)
-
-## 🧪 Testes Automatizados
-
-```bash
-# Testes unitários
-npm run test
-
-# Testes end‑to‑end (Playwright)
-npx playwright test
-```
-
-## 🎯 Roadmap Futuro
-
-- Integração com **Sentry** avançada e métricas de performance.
-- **Internacionalização** com `next-i18next` (pt‑BR / en‑US).
-- Deploy **automático** em Vercel via `vercel-action`.
+| Camada | Tecnologia | Destaques |
+| :--- | :--- | :--- |
+| **Core** | [Next.js 16](https://nextjs.org/) (Turbopack) | App Router, Server Actions e API Routes de baixa latência |
+| **Linguagem** | [TypeScript](https://www.typescriptlang.org/) | Tipagem estrita ponta a ponta |
+| **Estilização** | CSS Modules & HSL Design Tokens | Dark mode premium, micro-animações e responsividade total |
+| **Banco de Dados** | PostgreSQL via [Prisma ORM](https://www.prisma.io/) | Modelagem relacional, seeds automáticas e migrações |
+| **Autenticação** | [NextAuth.js v5](https://authjs.dev/) & Bcrypt | Credenciais criptografadas e tokens dinâmicos de QR Code |
+| **Ícones** | [Lucide React](https://lucide.dev/) | Iconografia moderna e leve |
 
 ---
 
-*Este README foi criado com imagens ilustrativas geradas por IA e segue as boas práticas de design premium para garantir a melhor primeira impressão.*
+## 🚀 Como Executar o Projeto Localmente
+
+### 1. Pré-requisitos
+- **Node.js** v20+ ou v22+
+- **Docker** e **Docker Compose** (para o PostgreSQL)
+
+### 2. Clonar o Repositório
+```bash
+git clone https://github.com/MATHEUSele/restaurante-pedidos-sistema-hermes.git
+cd restaurante-pedidos-sistema-hermes
+```
+
+### 3. Instalar Dependências
+```bash
+npm install
+```
+
+### 4. Subir o Banco de Dados com Docker
+```bash
+docker compose up -d
+```
+*(O banco PostgreSQL subirá automaticamente na porta configurada `5433`)*
+
+### 5. Configurar Variáveis de Ambiente
+Crie um arquivo `.env` na raiz do projeto com as credenciais:
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/hermes_db?schema=public"
+NEXTAUTH_SECRET="sua-chave-secreta-hermes-super-segura"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### 6. Rodar Migrações e Seed do Banco
+```bash
+npx prisma db push
+npx tsx scripts/update-product-images.ts
+```
+
+### 7. Iniciar o Servidor de Desenvolvimento
+```bash
+npm run dev
+```
+
+Acesse no navegador:
+👉 **`http://localhost:3000`**
+
+---
+
+## 🔑 Credenciais para Demonstração Rápida
+
+| Perfil | E-mail / Usuário | Senha |
+| :--- | :--- | :--- |
+| **Administrador** | `admin@hermes.com` *(ou `adm@gmail.com`)* | `admin123` *(ou `123`)* |
+| **Cozinha** | `cozinha@hermes.com` | `cozinha123` |
+| **Atendente** | `atendente@hermes.com` | `atendente123` |
+| **Desenvolvedor** | `dev@hermes.com` | `dev123` |
+
+*(Também é possível acessar via **Escanear QR Code** gerado no Painel ADM).*
+
+---
+
+## 📱 Rotas Principais do Sistema
+
+- **`/`** — Landing Page Institucional com Hero animado, CTAs de login/cadastro e vitrine de módulos.
+- **`/login`** — Tela de acesso unificada (Credenciais com visualização de senha + Leitor de QR Code).
+- **`/atendente`** — Terminal ágil de pedidos para balcão e garçons no celular.
+- **`/cozinha`** — Display KDS com esteira de preparação em tempo real.
+- **`/adm`** — Painel gerencial com métricas, faturamento e emissão de QR Codes de uso único.
+- **`/totem/[slug]`** — Cardápio digital de autoatendimento para mesas e clientes.
+- **`/dev`** — Workspace para testes de sandbox e simulação multi-loja.
+
+---
+
+<div align="center">
+  <sub>Desenvolvido com excelência visual e arquitetura de tempo real para o Sistema Hermes.</sub>
+</div>

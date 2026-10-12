@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { usePedidosApi } from "../hooks/usePedidosApi";
-import { LayoutDashboard, Clock, History, CheckCircle, XCircle, Users, QrCode, X } from "lucide-react";
+import { LayoutDashboard, Clock, History, CheckCircle, XCircle, Users, QrCode, X, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useSession, signOut } from "next-auth/react";
 
 import styles from "./adm.module.css";
 
@@ -13,13 +13,14 @@ const QRCodeModal = dynamic(() => import("../components/QRCodeModal"), { ssr: fa
 
 const NAV_LINKS = [
   { href: "/", label: "🏠 Home" },
-  { href: "/dev", label: "💻 Workspace DEV" },
   { href: "/adm", label: "🛠️ Painel ADM" },
   { href: "/cozinha", label: "🍳 Cozinha" },
   { href: "/atendente", label: "🧾 Atendente" },
+  { href: "/dev", label: "💻 Workspace DEV" },
 ];
 
 function AdmPanel() {
+  const { data: session } = useSession();
   const { pedidos, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   const [activeTab, setActiveTab] = useState<"ao_vivo" | "prontos" | "historico" | "equipe">("ao_vivo");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,9 +92,14 @@ function AdmPanel() {
       
       {/* Header Responsivo */}
       <header className={styles.header}>
-        <h1 className={styles.headerTitle}>
-          <LayoutDashboard color="#4F46E5" /> Painel ADM
-        </h1>
+        <div>
+          <span style={{ fontSize: "0.75rem", color: "#6B7280", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Sistema Hermes &bull; Gestão do Estabelecimento
+          </span>
+          <h1 className={styles.headerTitle} style={{ margin: "0.2rem 0 0 0" }}>
+            <LayoutDashboard color="#4F46E5" /> Painel ADM
+          </h1>
+        </div>
         
         {/* Hamburger */}
         <div style={{ position: "relative" }}>
@@ -102,11 +108,23 @@ function AdmPanel() {
           </button>
           {menuOpen && (
             <nav className={styles.navMenu}>
+              <p style={{ margin: "0 0 0.5rem 0", padding: "0.25rem 0.5rem", borderBottom: "1px solid #E5E7EB", color: "#6B7280", fontSize: "0.8rem", fontWeight: "bold" }}>
+                {session?.user?.name ? `Olá, ${session.user.name}` : "Administrador"}
+                <span style={{ display: "block", fontSize: "0.7rem", color: "#9CA3AF", fontWeight: "normal" }}>
+                  Perfil: {session?.user?.perfil || "ADM"}
+                </span>
+              </p>
               {NAV_LINKS.map((link) => (
                 <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className={styles.navLink}>
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "0.6rem 0.8rem", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.88rem", fontWeight: 600 }}
+              >
+                <LogOut size={16} /> Sair do Sistema
+              </button>
             </nav>
           )}
         </div>

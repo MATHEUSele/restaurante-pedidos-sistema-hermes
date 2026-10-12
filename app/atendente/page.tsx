@@ -5,15 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./atendente.module.css";
 import { usePedidosApi } from "../hooks/usePedidosApi";
-import { Store, ShoppingCart, Plus, Minus, Trash2, CheckCircle2, Image as ImageIcon, Menu, X, Clock, User, FileText } from "lucide-react";
-
-const NAV_LINKS = [
-  { href: "/", label: "🏠 Home" },
-  { href: "/dev", label: "💻 Workspace DEV" },
-  { href: "/adm", label: "🛠️ Painel ADM" },
-  { href: "/cozinha", label: "🍳 Cozinha" },
-  { href: "/atendente", label: "🧾 Atendente" },
-];
+import { Store, ShoppingCart, Plus, Minus, Trash2, CheckCircle2, Image as ImageIcon, Menu, X, Clock, User, FileText, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 // Mock Data baseado no cardápio "Pastelaria do Galo"
 const MOCK_CATEGORIES = ["Salgados", "Especiais", "Doces", "Bebidas"];
@@ -82,6 +75,7 @@ function ProductCardImage({ src, alt }: { src?: string; alt: string }) {
 }
 
 function AtendenteInterface() {
+  const { data: session } = useSession();
   const { pedidos, criarPedido, atualizarStatus } = usePedidosApi({ restauranteId: "rest-pastelaria-do-galo" });
   
   const [activeTab, setActiveTab] = useState<"cardapio" | "prontos">(() => {
@@ -203,33 +197,56 @@ function AtendenteInterface() {
   return (
     <div className={styles.container}>
 
-      {/* Hamburger Nav — Temporário para dev */}
+      {/* Menu / Perfil */}
       <div className={styles.burgerWrapper}>
         <button className={styles.burgerBtn} onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         {menuOpen && (
           <nav className={styles.burgerMenu}>
-            <p className={styles.burgerTitle}>Navegar para</p>
-            {NAV_LINKS.map(link => (
-              <Link key={link.href} href={link.href} className={styles.burgerLink} onClick={() => setMenuOpen(false)}>
-                {link.label}
-              </Link>
-            ))}
+            <p className={styles.burgerTitle}>
+              {session?.user?.name ? `Olá, ${session.user.name}` : "Operador"}
+              <span style={{ display: "block", fontSize: "0.75rem", color: "#6B7280", fontWeight: "normal" }}>
+                Perfil: {session?.user?.perfil || "ATENDENTE"}
+              </span>
+            </p>
+            <Link href="/" className={styles.burgerLink} onClick={() => setMenuOpen(false)}>
+              🏠 Página Inicial
+            </Link>
+            {(session?.user?.perfil === "ADM" || session?.user?.perfil === "DEV") && (
+              <>
+                <Link href="/adm" className={styles.burgerLink} onClick={() => setMenuOpen(false)}>
+                  🛠️ Painel ADM
+                </Link>
+                <Link href="/cozinha" className={styles.burgerLink} onClick={() => setMenuOpen(false)}>
+                  🍳 Fila da Cozinha
+                </Link>
+              </>
+            )}
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className={styles.burgerLink}
+              style={{ width: "100%", textAlign: "left", background: "none", border: "none", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <LogOut size={16} /> Encerrar Turno (Sair)
+            </button>
           </nav>
         )}
       </div>
 
-      {/* Toast Not removido em prol de feedback nativo */}
-      
       {/* Main Content (Left) */}
       <div className={styles.main}>
         {/* Header / Categories */}
         <header className={styles.header}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "1.5rem" }}>
-            <h1 className={styles.title} style={{ margin: 0 }}>
-              <Store size={24} /> Pastelaria do Galo
-            </h1>
+            <div>
+              <span style={{ fontSize: "0.75rem", color: "#6B7280", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Sistema Hermes &bull; Terminal Atendente
+              </span>
+              <h1 className={styles.title} style={{ margin: "0.2rem 0 0 0", fontSize: "1.35rem" }}>
+                <Store size={22} /> Pastelaria do Galo
+              </h1>
+            </div>
             <div style={{ display: "flex", background: "#E5E7EB", padding: "0.25rem", borderRadius: "0.5rem" }}>
               <button 
                 onClick={() => setActiveTab("cardapio")}

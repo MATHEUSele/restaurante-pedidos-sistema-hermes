@@ -22,17 +22,31 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url))
   }
 
-  // ADM tem acesso livre a tudo — não bloqueia nem redireciona
-  if (isAuth && perfil === "ADM" && !isLoginPage) {
-    return NextResponse.next()
-  }
+  // Regras de RBAC por perfil quando autenticado:
+  if (isAuth) {
+    // Redireciona perfis para sua tela principal ao tentar acessar /login
+    if (isLoginPage) {
+      if (perfil === "DEV") return NextResponse.redirect(new URL("/dev", req.url))
+      if (perfil === "ADM") return NextResponse.redirect(new URL("/adm", req.url))
+      if (perfil === "COZINHA") return NextResponse.redirect(new URL("/cozinha", req.url))
+      if (perfil === "ATENDENTE") return NextResponse.redirect(new URL("/atendente", req.url))
+      return NextResponse.redirect(new URL("/", req.url))
+    }
 
-  // Redireciona perfis para sua tela principal ao tentar acessar /login
-  if (isAuth && isLoginPage) {
-    if (perfil === "DEV") return NextResponse.redirect(new URL("/dev", req.url))
-    if (perfil === "ADM") return NextResponse.redirect(new URL("/adm", req.url))
-    if (perfil === "COZINHA") return NextResponse.redirect(new URL("/cozinha", req.url))
-    return NextResponse.redirect(new URL("/", req.url))
+    // ADM e DEV têm trânsito livre
+    if (perfil === "ADM" || perfil === "DEV") {
+      return NextResponse.next()
+    }
+
+    // ATENDENTE só pode acessar sua área (bloqueado de /adm e /cozinha)
+    if (perfil === "ATENDENTE" && (url.pathname.startsWith("/adm") || url.pathname.startsWith("/cozinha"))) {
+      return NextResponse.redirect(new URL("/atendente", req.url))
+    }
+
+    // COZINHA só pode acessar sua área (bloqueado de /adm)
+    if (perfil === "COZINHA" && url.pathname.startsWith("/adm")) {
+      return NextResponse.redirect(new URL("/cozinha", req.url))
+    }
   }
 })
 

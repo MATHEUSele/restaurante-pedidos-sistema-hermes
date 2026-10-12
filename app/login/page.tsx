@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, ShieldCheck, Sparkles, QrCode } from "lucide-react"
@@ -13,6 +14,12 @@ const QRScannerModal = dynamic(() => import("../components/QRScannerModal"), { s
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [scannerOpen, setScannerOpen] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("mode=register")) {
+      setIsLogin(false)
+    }
+  }, [])
   
   // Estados para Login e Cadastro
   const [nome, setNome] = useState("")
@@ -28,6 +35,20 @@ export default function LoginPage() {
   const { addToast } = useToast()
   
   const router = useRouter()
+
+  const redirectByRole = async () => {
+    try {
+      const sRes = await fetch("/api/auth/session")
+      const sessionData = await sRes.json()
+      const role = sessionData?.user?.perfil
+      if (role === "ATENDENTE") router.push("/atendente")
+      else if (role === "COZINHA") router.push("/cozinha")
+      else if (role === "DEV") router.push("/dev")
+      else router.push("/adm")
+    } catch {
+      router.push("/adm")
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,7 +69,7 @@ export default function LoginPage() {
         } else {
           addToast("Login realizado com sucesso! Redirecionando...", "success")
           router.refresh()
-          router.push("/adm")
+          await redirectByRole()
         }
       } else {
         // Fluxo de Cadastro
@@ -147,12 +168,18 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         
+        <div style={{ width: "100%", marginBottom: "0.75rem" }}>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "#64748B", textDecoration: "none", fontSize: "0.85rem", fontWeight: 600 }}>
+            ← Voltar para a Página Inicial
+          </Link>
+        </div>
+        
         <div className={styles.header}>
           <div className={styles.logoBadge}>
             <ShieldCheck size={28} color="#4f46e5" />
           </div>
-          <h1 className={styles.title}>Hermes</h1>
-          <p className={styles.subtitle}>Sistema de Pedidos e Gestão</p>
+          <h1 className={styles.title}>Sistema Hermes</h1>
+          <p className={styles.subtitle}>Plataforma Inteligente de Gestão de Pedidos</p>
         </div>
 
         {/* Toggle Login/Cadastro */}

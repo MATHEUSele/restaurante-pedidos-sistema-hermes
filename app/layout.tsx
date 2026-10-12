@@ -9,8 +9,8 @@ import { ToastProvider } from './context/ToastContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Hermes - Pedidos',
-  description: 'Sistema de pedidos para restaurantes',
+  title: 'Sistema Hermes — Plataforma Inteligente de Gestão de Pedidos',
+  description: 'Ecossistema completo de autoatendimento, terminal de garçom, display de cozinha KDS e gestão em tempo real.',
 }
 
 import ThemeToggle from './components/ThemeToggle'

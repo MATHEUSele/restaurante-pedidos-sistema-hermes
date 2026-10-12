@@ -1,126 +1,308 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Store, Utensils, ChefHat, LayoutDashboard, QrCode, LogIn, Laptop } from "lucide-react";
+import Image from "next/image";
+import { useSession, signOut } from "next-auth/react";
+import dynamic from "next/dynamic";
+import styles from "./home.module.css";
+import {
+  ShieldCheck,
+  QrCode,
+  LogIn,
+  UserPlus,
+  Utensils,
+  ChefHat,
+  LayoutDashboard,
+  Smartphone,
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  ExternalLink,
+  LogOut,
+  Zap
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "./context/ToastContext";
+import { signIn } from "next-auth/react";
 
-export default function Home() {
+const QRScannerModal = dynamic(() => import("./components/QRScannerModal"), { ssr: false });
+
+export default function HomePage() {
+  const { data: session, status } = useSession();
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const router = useRouter();
+  const { addToast } = useToast();
+
+  const handleQRScanned = async (scannedText: string) => {
+    setScannerOpen(false);
+    let token = scannedText.trim();
+    try {
+      if (token.includes("token=")) {
+        const urlObj = new URL(token, window.location.origin);
+        token = urlObj.searchParams.get("token") || token;
+      }
+    } catch {
+      // url relativa ou token puro
+    }
+
+    addToast("QR Code detectado! Validando acesso de atendente...", "info");
+    const res = await signIn("credentials", {
+      qrToken: token,
+      redirect: false,
+    });
+
+    if (res?.error) {
+      addToast("QR Code inválido, já utilizado ou expirado.", "error");
+    } else {
+      addToast("Login de Atendente autorizado via QR Code!", "success");
+      router.refresh();
+      router.push("/atendente");
+    }
+  };
+
+  const getDashboardLink = () => {
+    const role = session?.user?.perfil;
+    if (role === "ATENDENTE") return "/atendente";
+    if (role === "COZINHA") return "/cozinha";
+    if (role === "DEV") return "/dev";
+    return "/adm";
+  };
+
   return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100dvh',
-      padding: '2rem 1rem',
-      background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)',
-      color: '#F8FAFC',
-      fontFamily: 'Inter, sans-serif',
-      boxSizing: 'border-box'
-    }}>
-      <div style={{ textAlign: 'center', maxWidth: '640px', marginBottom: '2.5rem' }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: 'rgba(245, 197, 24, 0.15)',
-          color: '#FCD34D',
-          padding: '0.4rem 1rem',
-          borderRadius: '999px',
-          fontSize: '0.875rem',
-          fontWeight: 700,
-          marginBottom: '1rem',
-          border: '1px solid rgba(245, 197, 24, 0.3)'
-        }}>
-          🥟 PASTELARIA DO GALO &bull; SISTEMA HERMES
+    <div className={styles.pageWrapper}>
+      {/* Navbar Superior */}
+      <header className={styles.navbar}>
+        <Link href="/" className={styles.brand}>
+          <div className={styles.brandLogo}>
+            <Zap size={22} />
+          </div>
+          <div className={styles.brandText}>
+            <span className={styles.brandTitle}>Sistema Hermes</span>
+            <span className={styles.brandSubtitle}>Plataforma de Pedidos</span>
+          </div>
+        </Link>
+
+        <div className={styles.navActions}>
+          <button
+            type="button"
+            className={styles.navQrBtn}
+            onClick={() => setScannerOpen(true)}
+            title="Escanear QR Code de Atendente"
+          >
+            <QrCode size={18} />
+            <span>Escanear QR</span>
+          </button>
+
+          {status === "authenticated" ? (
+            <>
+              <Link href={getDashboardLink()} className={styles.navRegisterBtn}>
+                <span>Meu Painel ({session?.user?.perfil})</span>
+                <ArrowRight size={16} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className={styles.navLoginBtn}
+                title="Sair do sistema"
+              >
+                <LogOut size={16} />
+                <span>Sair</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={styles.navLoginBtn}>
+                <LogIn size={16} />
+                <span>Entrar</span>
+              </Link>
+              <Link href="/login?mode=register" className={styles.navRegisterBtn}>
+                <UserPlus size={16} />
+                <span>Criar Conta</span>
+              </Link>
+            </>
+          )}
         </div>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, margin: '0 0 0.75rem 0', letterSpacing: '-0.025em' }}>
-          Sistema de Pedidos Inteligente
+      </header>
+
+      {/* Hero Principal */}
+      <main className={styles.heroSection}>
+        <div className={styles.badge}>
+          <span className={styles.liveIndicator}></span>
+          <span>SISTEMA HERMES &bull; GESTÃO EM TEMPO REAL</span>
+        </div>
+
+        <h1 className={styles.headline}>
+          O ecossistema definitivo para <br />
+          <span className={styles.headlineGradient}>pedidos e atendimento</span>
         </h1>
-        <p style={{ color: '#94A3B8', fontSize: '1.05rem', lineHeight: 1.6, margin: 0 }}>
-          Plataforma completa e 100% responsiva para totens, celulares de atendentes, tela da cozinha e gestão administrativa com sincronização instantânea via QR Code.
+
+        <p className={styles.subheadline}>
+          Cardápios digitais para clientes, terminais ágeis para garçons, tela de cozinha KDS sincronizada e gestão administrativa em tempo real com acesso instantâneo via QR Code.
         </p>
-      </div>
-      
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '1rem',
-        width: '100%',
-        maxWidth: '900px'
-      }}>
-        <Link href="/atendente" style={cardStyle('#7A1E2E', '#F5C518')}>
-          <Utensils size={28} />
-          <div>
-            <div style={cardTitle}>Totem Atendente</div>
-            <div style={cardSub}>Tirar pedidos no balcão ou celular</div>
-          </div>
-        </Link>
 
-        <Link href="/cozinha" style={cardStyle('#1F2937', '#10B981')}>
-          <ChefHat size={28} />
-          <div>
-            <div style={cardTitle}>Interface Cozinha</div>
-            <div style={cardSub}>Fila ao vivo em tempo real</div>
-          </div>
-        </Link>
+        {/* Grupo de Ações Primárias (CTAs) */}
+        <div className={styles.ctaGroup}>
+          <Link href="/login" className={styles.primaryCta}>
+            <LogIn size={20} />
+            <span>Acessar o Sistema</span>
+            <ArrowRight size={18} />
+          </Link>
 
-        <Link href="/adm" style={cardStyle('#312E81', '#818CF8')}>
-          <LayoutDashboard size={28} />
-          <div>
-            <div style={cardTitle}>Painel Administrativo</div>
-            <div style={cardSub}>Métricas &amp; Geração de QR Code</div>
-          </div>
-        </Link>
+          <Link href="/login?mode=register" className={styles.secondaryCta}>
+            <Sparkles size={18} color="#F59E0B" />
+            <span>Criar Nova Conta</span>
+          </Link>
 
-        <Link href="/login" style={cardStyle('#064E3B', '#34D399')}>
-          <LogIn size={28} />
-          <div>
-            <div style={cardTitle}>Login / Escanear QR</div>
-            <div style={cardSub}>Acesso com senha ou câmera</div>
-          </div>
-        </Link>
+          <button
+            type="button"
+            className={styles.qrScanCta}
+            onClick={() => setScannerOpen(true)}
+          >
+            <QrCode size={20} />
+            <span>Escanear QR Code de Atendente no Celular</span>
+          </button>
+        </div>
 
-        <Link href="/totem/pastelaria-do-galo" style={cardStyle('#831843', '#F472B6')}>
-          <QrCode size={28} />
-          <div>
-            <div style={cardTitle}>Totem do Cliente</div>
-            <div style={cardSub}>Cardápio digital mobile</div>
-          </div>
-        </Link>
+        {/* Visual Stage Showcase (Banner Dinâmico) */}
+        <div className={styles.showcaseStage}>
+          <div className={styles.showcaseInner}>
+            <Image
+              src="/images/branding/hermes-hero-banner.jpg"
+              alt="Apresentação do Sistema Hermes em múltiplos dispositivos"
+              fill
+              priority
+              unoptimized
+              className={styles.showcaseImage}
+            />
+            {/* Badges Flutuantes Decorativos */}
+            <div className={styles.floatingTagLeft}>
+              <CheckCircle2 size={18} color="#10B981" />
+              <span>Fila da Cozinha KDS: 0s de latência</span>
+            </div>
 
-        <Link href="/dev" style={cardStyle('#1E293B', '#94A3B8')}>
-          <Laptop size={28} />
-          <div>
-            <div style={cardTitle}>Workspace DEV</div>
-            <div style={cardSub}>Simulação multi-lojas e testes</div>
+            <div className={styles.floatingTagRight}>
+              <Zap size={18} color="#F59E0B" />
+              <span>Sincronização Instantânea via QR Code</span>
+            </div>
           </div>
-        </Link>
-      </div>
-    </main>
+        </div>
+
+        {/* Seção dos Módulos Principais */}
+        <h2 className={styles.sectionTitle}>Módulos do Sistema Hermes</h2>
+        <p className={styles.sectionSubtitle}>
+          Projetado para garantir velocidade na tomada do pedido, clareza no preparo e controle total da operação.
+        </p>
+
+        <div className={styles.modulesGrid}>
+          {/* Módulo 1: Totem do Cliente */}
+          <div className={styles.moduleCard}>
+            <div className={styles.moduleIcon} style={{ background: "rgba(244, 114, 182, 0.15)", color: "#F472B6" }}>
+              <Smartphone size={28} />
+            </div>
+            <h3 className={styles.moduleTitle}>Totem &amp; Cardápio Mobile</h3>
+            <p className={styles.moduleDesc}>
+              Cardápio digital mobile para autoatendimento do cliente na mesa ou balcão, com fotos em alta definição e carrinho intuitivo.
+            </p>
+            <Link href="/totem/pastelaria-do-galo" className={styles.moduleAction}>
+              <span>Ver Cardápio Demonstração</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Módulo 2: Terminal do Atendente */}
+          <div className={styles.moduleCard}>
+            <div className={styles.moduleIcon} style={{ background: "rgba(245, 158, 11, 0.15)", color: "#F59E0B" }}>
+              <Utensils size={28} />
+            </div>
+            <h3 className={styles.moduleTitle}>Terminal do Atendente</h3>
+            <p className={styles.moduleDesc}>
+              Interface 100% responsiva para celulares e tablets dos garçons. Lançamento rápido de pedidos e alertas de pratos prontos.
+            </p>
+            <Link href="/atendente" className={styles.moduleAction}>
+              <span>Acessar Terminal</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Módulo 3: KDS Cozinha */}
+          <div className={styles.moduleCard}>
+            <div className={styles.moduleIcon} style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10B981" }}>
+              <ChefHat size={28} />
+            </div>
+            <h3 className={styles.moduleTitle}>Display Cozinha (KDS)</h3>
+            <p className={styles.moduleDesc}>
+              Visão limpa da esteira de preparo em tempo real. Separação visual por status (Pendente, Preparando, Pronto) com avisos automáticos.
+            </p>
+            <Link href="/cozinha" className={styles.moduleAction}>
+              <span>Acessar Fila da Cozinha</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Módulo 4: Painel Administrativo */}
+          <div className={styles.moduleCard}>
+            <div className={styles.moduleIcon} style={{ background: "rgba(99, 102, 241, 0.15)", color: "#818CF8" }}>
+              <LayoutDashboard size={28} />
+            </div>
+            <h3 className={styles.moduleTitle}>Painel Administrativo</h3>
+            <p className={styles.moduleDesc}>
+              Métricas de faturamento ao vivo, gerador de QR Codes de uso único para sincronizar novos atendentes e controle de cardápio.
+            </p>
+            <Link href="/adm" className={styles.moduleAction}>
+              <span>Acessar Painel ADM</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Infográfico do Fluxo Operacional */}
+        <div className={styles.pipelineSection}>
+          <h2 className={styles.sectionTitle}>Fluxo de Operação Integrada</h2>
+          <p className={styles.sectionSubtitle}>
+            Como as informações viajam em tempo real entre o cliente, garçom, cozinha e a gerência.
+          </p>
+          <div className={styles.pipelineBanner}>
+            <Image
+              src="/images/branding/hermes-system-flow.jpg"
+              alt="Fluxo de trabalho integrado do Sistema Hermes"
+              fill
+              unoptimized
+              style={{ objectFit: "cover" }}
+            />
+          </div>
+        </div>
+
+        {/* Case de Sucesso Modelado: Pastelaria do Galo */}
+        <div className={styles.caseCard}>
+          <div className={styles.caseInfo}>
+            <div className={styles.caseBadge}>
+              <Sparkles size={14} />
+              <span>CASE DE DEMONSTRAÇÃO ATIVO</span>
+            </div>
+            <h3 className={styles.caseTitle}>Pastelaria do Galo</h3>
+            <p className={styles.caseText}>
+              Este case prático opera sobre o Sistema Hermes utilizando cardápio artesanal com mais de 20 tipos de pastéis e bebidas, totens de mesa sincronizados e display de fritura em tempo real.
+            </p>
+          </div>
+          <Link href="/totem/pastelaria-do-galo" className={styles.caseBtn}>
+            <span>Explorar Totem do Case</span>
+            <ExternalLink size={18} />
+          </Link>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <p>&copy; {new Date().getFullYear()} Sistema Hermes &bull; Plataforma Inteligente de Gestão de Pedidos e Atendimento em Tempo Real.</p>
+      </footer>
+
+      {/* Modal de Leitura de QR Code */}
+      <QRScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScanSuccess={handleQRScanned}
+      />
+    </div>
   );
 }
-
-const cardStyle = (bg: string, accent: string) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '1rem',
-  padding: '1.25rem 1.5rem',
-  backgroundColor: 'rgba(30, 41, 59, 0.7)',
-  backdropFilter: 'blur(8px)',
-  color: accent,
-  borderRadius: '1rem',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
-  textDecoration: 'none',
-  transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-});
-
-const cardTitle = {
-  fontSize: '1.1rem',
-  fontWeight: 700,
-  color: '#F8FAFC',
-  marginBottom: '0.2rem'
-};
-
-const cardSub = {
-  fontSize: '0.85rem',
-  color: '#94A3B8'
-};
