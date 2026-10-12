@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: "/cozinha", label: "🍳 Cozinha" },
   { href: "/atendente", label: "🧾 Atendente" },
   { href: "/dev", label: "💻 Workspace DEV" },
+  { href: "/restaurantes/novo", label: "➕ Novo Restaurante" },
 ];
 
 function AdmPanel() {

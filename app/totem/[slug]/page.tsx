@@ -47,8 +47,19 @@ function TotemMobileContent() {
   useEffect(() => {
     async function validateToken() {
       if (!token) {
-        setError("Token não fornecido. Escaneie o QR Code novamente.");
-        setLoading(false);
+        try {
+          const res = await fetch(`/api/restaurantes/${slug || "pastelaria-do-galo"}`);
+          const data = await res.json();
+          if (res.ok && data.restaurante) {
+            setRestauranteInfo(data.restaurante);
+          } else {
+            setError("Restaurante não encontrado no sistema.");
+          }
+        } catch {
+          setError("Erro ao carregar dados do restaurante.");
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
@@ -56,7 +67,7 @@ function TotemMobileContent() {
         const res = await fetch(`/api/qrcode/validar?token=${token}`);
         const data = await res.json();
         
-        if (res.ok && data.valid && (!slug || data.restaurante?.slug === slug || slug === "pastelaria-do-galo")) {
+        if (res.ok && data.valid && (!slug || data.restaurante?.slug === slug || slug === "pastelaria-do-galo" || data.restaurante?.id === `rest-${slug}`)) {
           setRestauranteInfo(data.restaurante);
         } else {
           setError(data.error || "Token inválido para esta loja.");
@@ -112,7 +123,15 @@ function TotemMobileContent() {
 
       <main className={styles.main}>
         <div className={styles.productsGrid}>
-          {MOCK_PRODUCTS.map(product => (
+          {(restauranteInfo?.produtos && restauranteInfo.produtos.length > 0
+            ? restauranteInfo.produtos.map((p: any) => ({
+                id: p.id,
+                name: p.nome,
+                price: p.preco,
+                image: p.imagem,
+              }))
+            : MOCK_PRODUCTS
+          ).map((product: any) => (
             <div key={product.id} className={styles.productCard} onClick={() => addToCart(product)}>
               <div className={styles.productImage}>
                 <TotemProductImage src={product.image} alt={product.name} />

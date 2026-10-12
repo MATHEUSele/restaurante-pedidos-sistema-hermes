@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   ExternalLink,
   LogOut,
-  Zap
+  Zap,
+  Building2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "./context/ToastContext";
@@ -251,6 +252,21 @@ export default function HomePage() {
             </p>
             <Link href="/adm" className={styles.moduleAction}>
               <span>Acessar Painel ADM</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Módulo 5: Multi-Estabelecimentos */}
+          <div className={styles.moduleCard}>
+            <div className={styles.moduleIcon} style={{ background: "rgba(56, 189, 248, 0.15)", color: "#38BDF8" }}>
+              <Building2 size={28} />
+            </div>
+            <h3 className={styles.moduleTitle}>Multi-Estabelecimentos</h3>
+            <p className={styles.moduleDesc}>
+              Cadastre novas unidades e franquias, personalize identidades visuais exclusivas e gerencie cardápios por loja.
+            </p>
+            <Link href="/restaurantes/novo" className={styles.moduleAction}>
+              <span>Cadastrar Novo Restaurante</span>
               <ArrowRight size={16} />
             </Link>
           </div>

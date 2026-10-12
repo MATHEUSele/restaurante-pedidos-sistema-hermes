@@ -9,7 +9,7 @@ export default auth((req) => {
   
   const isLoginPage = url.pathname === "/login"
   const isTotemPage = url.pathname.startsWith("/totem")
-  const isPublicApi = url.pathname.startsWith("/api/qrcode/validar") || url.pathname.startsWith("/api/auth") || url.pathname.startsWith("/api/health")
+  const isPublicApi = url.pathname.startsWith("/api/qrcode") || url.pathname.startsWith("/api/auth") || url.pathname.startsWith("/api/health") || url.pathname.startsWith("/api/restaurantes") || url.pathname.startsWith("/api/pedidos")
   const isStaticAsset = url.pathname.startsWith("/images") || url.pathname.startsWith("/favicon.ico") || /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)
 
   // Libera assets estáticos imediatamente

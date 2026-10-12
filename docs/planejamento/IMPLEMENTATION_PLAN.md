@@ -14,7 +14,20 @@
   - Tela **Atendente** usando API ✅
   - Tela **Cozinha** com polling ✅
   - Painel **ADM** lendo dados reais ✅
+- **Etapa 3 – Multi-Tenant & Cadastro de Restaurantes**
+  - Rota `GET /api/restaurantes` (listagem com agregações de contagem) ✅
+  - Rota `POST /api/restaurantes` (cadastro com validação, geração de slug, paleta de cores e produtos demo) ✅
+  - Rota `GET & PATCH /api/restaurantes/[id]` (consulta por slug/id e atualização de identidade) ✅
+  - Componente de formulário reutilizável `RestauranteForm.tsx` com Live Preview e Seletor de Cores ✅
+  - Tela dedicada de cadastro `/restaurantes/novo` ✅
+  - Workspace `/dev` dinâmico com listagem do banco e modal de criação instantânea ✅
+  - Tela `/dev/restaurante/[slug]` dinâmica com suporte a qualquer restaurante cadastrado ✅
+  - Totem `/totem/[slug]` com suporte a múltiplos restaurantes e catálogo dinâmico ✅
 - **Testes**
+  - Testes unitários de autenticação QR Code (`__tests__/qrCodeAuth.test.ts`).
+  - Testes do hook de pedidos (`__tests__/usePedidosApi.test.tsx`).
+  - Testes do componente RequireAuth (`__tests__/RequireAuth.test.tsx`).
+  - Testes automatizados da API de Restaurantes (`__tests__/restaurantes.test.ts`) ✅
   - Teste de registro (`tests/pedidos.spec.ts`).
   - Teste de login (`tests/login.spec.ts`).
 
