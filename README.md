@@ -138,6 +138,20 @@ Acesse no navegador:
 
 ---
 
+### ⚡ Atalhos Rápidos com Makefile
+
+Se você possui a ferramenta `make` instalada em seu ambiente, pode gerenciar e rodar a aplicação através dos atalhos disponíveis no [`Makefile`](./Makefile):
+
+| Comando | O que faz | Comando interno |
+| :--- | :--- | :--- |
+| `make dev` | Inicia o servidor local do Next.js em modo de desenvolvimento | `npm run dev` |
+| `make docker-up` | Constrói e inicializa os containers Docker em segundo plano | `docker compose up -d --build` |
+| `make docker-down` | Para e remove os containers ativos do Docker Compose | `docker compose down` |
+| `make docker-logs` | Transmite e acompanha os logs dos containers em tempo real | `docker compose logs -f` |
+| `make docker-migrate` | Cria e aplica novas migrações do banco com Prisma ORM | `npx prisma migrate dev --name init` |
+
+---
+
 ## 🔑 Credenciais para Demonstração Rápida
 
 | Perfil | E-mail / Usuário | Senha |
